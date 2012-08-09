@@ -1,0 +1,20 @@
+@import 'configuration';
+
+.code-editor {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  left: $filebrowser_width + 5px;
+
+  .CodeMirror {
+    width: 100%;
+    font-family: 'Monaco', 'Courier New';
+    font-size: 12px;
+    line-height: 18px;
+
+    .CodeMirror-scroll {
+      height: 500px; // To be resized with JS
+      overflow: auto;
+    }
+  }
+}

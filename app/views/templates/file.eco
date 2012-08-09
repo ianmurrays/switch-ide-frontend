@@ -1,0 +1,19 @@
+<div class="file-item">
+  <a href="javascript:;" id="cid_<%= @file.cid %>">
+    <% if @file.isDirectory(): %>
+      
+      <% if @directory: %>
+        <i class="icon-folder-open"></i>
+      <% else: %>
+        <i class="icon-folder-close"></i>
+      <% end %>
+
+      <%= @file.get('name') %>
+
+    <% else: %>
+      <i class="icon-file"></i> <%= @file.get('name') %>
+    <% end %>
+  </a>
+</div>
+
+<div class="subdirectory file-item"></div>

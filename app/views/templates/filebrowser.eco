@@ -1,0 +1,9 @@
+<ul class="nav nav-list">
+  <li class="nav-header"> Open Files </li>
+</ul>
+<ul class="nav nav-list" id="open_files"></ul>
+
+<ul class="nav nav-list">
+  <li class="nav-header">Project</li>
+</ul>
+<div class="nav nav-list" id="project_files"></div>

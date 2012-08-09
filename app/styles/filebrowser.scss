@@ -1,0 +1,36 @@
+@import 'configuration';
+
+#filebrowser {
+  position: fixed;
+  left: 0;
+  width: $filebrowser_width;
+  height: 100%;
+  background: whiteSmoke;
+
+  box-shadow: 0 0 15px #666;
+
+  .file-container {
+    .subdirectory { padding-left: 15px; }
+
+    .file-item {
+      line-height: 18px;
+
+      [class^="icon-"] {
+        margin-right: 2px;
+      }
+
+      a {
+        display: block;
+        margin-right: -15px;
+        margin-left: -15px;
+        text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+        padding: 3px 15px;
+      }
+
+      a:hover {
+        text-decoration: none;
+        background-color: #eeeeee;
+      }
+    }
+  }
+}
