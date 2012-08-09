@@ -11,7 +11,13 @@
       <%= @file.get('name') %>
 
     <% else: %>
-      <i class="icon-file"></i> <%= @file.get('name') %>
+      <% if @file.isView(): %>
+        <i class="icon-eye-open"></i> 
+      <% else: %>
+        <i class="icon-file"></i> 
+      <% end %>
+
+      <%= @file.get('name') %>
     <% end %>
   </a>
 </div>

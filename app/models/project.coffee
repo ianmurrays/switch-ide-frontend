@@ -10,5 +10,4 @@ module.exports = class Project extends Model
 
     if @get('id')
       @rootFolder = new Files null, path: "/", project: this
-      @rootFolder.on 'reset' => @trigger 'change'
       @rootFolder.fetch()

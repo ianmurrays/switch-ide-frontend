@@ -15776,3 +15776,762 @@ CodeMirror.defineMode('coffeescript', function(conf) {
 CodeMirror.defineMIME('text/x-coffeescript', 'coffeescript');
 ;
 
+CodeMirror.defineMode("css", function(config) {
+  var indentUnit = config.indentUnit, type;
+  function ret(style, tp) {type = tp; return style;}
+
+  function tokenBase(stream, state) {
+    var ch = stream.next();
+    if (ch == "@") {stream.eatWhile(/[\w\\\-]/); return ret("meta", stream.current());}
+    else if (ch == "/" && stream.eat("*")) {
+      state.tokenize = tokenCComment;
+      return tokenCComment(stream, state);
+    }
+    else if (ch == "<" && stream.eat("!")) {
+      state.tokenize = tokenSGMLComment;
+      return tokenSGMLComment(stream, state);
+    }
+    else if (ch == "=") ret(null, "compare");
+    else if ((ch == "~" || ch == "|") && stream.eat("=")) return ret(null, "compare");
+    else if (ch == "\"" || ch == "'") {
+      state.tokenize = tokenString(ch);
+      return state.tokenize(stream, state);
+    }
+    else if (ch == "#") {
+      stream.eatWhile(/[\w\\\-]/);
+      return ret("atom", "hash");
+    }
+    else if (ch == "!") {
+      stream.match(/^\s*\w*/);
+      return ret("keyword", "important");
+    }
+    else if (/\d/.test(ch)) {
+      stream.eatWhile(/[\w.%]/);
+      return ret("number", "unit");
+    }
+    else if (/[,.+>*\/]/.test(ch)) {
+      return ret(null, "select-op");
+    }
+    else if (/[;{}:\[\]]/.test(ch)) {
+      return ret(null, ch);
+    }
+    else {
+      stream.eatWhile(/[\w\\\-]/);
+      return ret("variable", "variable");
+    }
+  }
+
+  function tokenCComment(stream, state) {
+    var maybeEnd = false, ch;
+    while ((ch = stream.next()) != null) {
+      if (maybeEnd && ch == "/") {
+        state.tokenize = tokenBase;
+        break;
+      }
+      maybeEnd = (ch == "*");
+    }
+    return ret("comment", "comment");
+  }
+
+  function tokenSGMLComment(stream, state) {
+    var dashes = 0, ch;
+    while ((ch = stream.next()) != null) {
+      if (dashes >= 2 && ch == ">") {
+        state.tokenize = tokenBase;
+        break;
+      }
+      dashes = (ch == "-") ? dashes + 1 : 0;
+    }
+    return ret("comment", "comment");
+  }
+
+  function tokenString(quote) {
+    return function(stream, state) {
+      var escaped = false, ch;
+      while ((ch = stream.next()) != null) {
+        if (ch == quote && !escaped)
+          break;
+        escaped = !escaped && ch == "\\";
+      }
+      if (!escaped) state.tokenize = tokenBase;
+      return ret("string", "string");
+    };
+  }
+
+  return {
+    startState: function(base) {
+      return {tokenize: tokenBase,
+              baseIndent: base || 0,
+              stack: []};
+    },
+
+    token: function(stream, state) {
+      if (stream.eatSpace()) return null;
+      var style = state.tokenize(stream, state);
+
+      var context = state.stack[state.stack.length-1];
+      if (type == "hash" && context != "rule") style = "string-2";
+      else if (style == "variable") {
+        if (context == "rule") style = "number";
+        else if (!context || context == "@media{") style = "tag";
+      }
+
+      if (context == "rule" && /^[\{\};]$/.test(type))
+        state.stack.pop();
+      if (type == "{") {
+        if (context == "@media") state.stack[state.stack.length-1] = "@media{";
+        else state.stack.push("{");
+      }
+      else if (type == "}") state.stack.pop();
+      else if (type == "@media") state.stack.push("@media");
+      else if (context == "{" && type != "comment") state.stack.push("rule");
+      return style;
+    },
+
+    indent: function(state, textAfter) {
+      var n = state.stack.length;
+      if (/^\}/.test(textAfter))
+        n -= state.stack[state.stack.length-1] == "rule" ? 2 : 1;
+      return state.baseIndent + n * indentUnit;
+    },
+
+    electricChars: "}"
+  };
+});
+
+CodeMirror.defineMIME("text/css", "css");
+;
+
+CodeMirror.defineMode("javascript", function(config, parserConfig) {
+  var indentUnit = config.indentUnit;
+  var jsonMode = parserConfig.json;
+
+  // Tokenizer
+
+  var keywords = function(){
+    function kw(type) {return {type: type, style: "keyword"};}
+    var A = kw("keyword a"), B = kw("keyword b"), C = kw("keyword c");
+    var operator = kw("operator"), atom = {type: "atom", style: "atom"};
+    return {
+      "if": A, "while": A, "with": A, "else": B, "do": B, "try": B, "finally": B,
+      "return": C, "break": C, "continue": C, "new": C, "delete": C, "throw": C,
+      "var": kw("var"), "const": kw("var"), "let": kw("var"),
+      "function": kw("function"), "catch": kw("catch"),
+      "for": kw("for"), "switch": kw("switch"), "case": kw("case"), "default": kw("default"),
+      "in": operator, "typeof": operator, "instanceof": operator,
+      "true": atom, "false": atom, "null": atom, "undefined": atom, "NaN": atom, "Infinity": atom
+    };
+  }();
+
+  var isOperatorChar = /[+\-*&%=<>!?|]/;
+
+  function chain(stream, state, f) {
+    state.tokenize = f;
+    return f(stream, state);
+  }
+
+  function nextUntilUnescaped(stream, end) {
+    var escaped = false, next;
+    while ((next = stream.next()) != null) {
+      if (next == end && !escaped)
+        return false;
+      escaped = !escaped && next == "\\";
+    }
+    return escaped;
+  }
+
+  // Used as scratch variables to communicate multiple values without
+  // consing up tons of objects.
+  var type, content;
+  function ret(tp, style, cont) {
+    type = tp; content = cont;
+    return style;
+  }
+
+  function jsTokenBase(stream, state) {
+    var ch = stream.next();
+    if (ch == '"' || ch == "'")
+      return chain(stream, state, jsTokenString(ch));
+    else if (/[\[\]{}\(\),;\:\.]/.test(ch))
+      return ret(ch);
+    else if (ch == "0" && stream.eat(/x/i)) {
+      stream.eatWhile(/[\da-f]/i);
+      return ret("number", "number");
+    }      
+    else if (/\d/.test(ch) || ch == "-" && stream.eat(/\d/)) {
+      stream.match(/^\d*(?:\.\d*)?(?:[eE][+\-]?\d+)?/);
+      return ret("number", "number");
+    }
+    else if (ch == "/") {
+      if (stream.eat("*")) {
+        return chain(stream, state, jsTokenComment);
+      }
+      else if (stream.eat("/")) {
+        stream.skipToEnd();
+        return ret("comment", "comment");
+      }
+      else if (state.reAllowed) {
+        nextUntilUnescaped(stream, "/");
+        stream.eatWhile(/[gimy]/); // 'y' is "sticky" option in Mozilla
+        return ret("regexp", "string-2");
+      }
+      else {
+        stream.eatWhile(isOperatorChar);
+        return ret("operator", null, stream.current());
+      }
+    }
+    else if (ch == "#") {
+        stream.skipToEnd();
+        return ret("error", "error");
+    }
+    else if (isOperatorChar.test(ch)) {
+      stream.eatWhile(isOperatorChar);
+      return ret("operator", null, stream.current());
+    }
+    else {
+      stream.eatWhile(/[\w\$_]/);
+      var word = stream.current(), known = keywords.propertyIsEnumerable(word) && keywords[word];
+      return (known && state.kwAllowed) ? ret(known.type, known.style, word) :
+                     ret("variable", "variable", word);
+    }
+  }
+
+  function jsTokenString(quote) {
+    return function(stream, state) {
+      if (!nextUntilUnescaped(stream, quote))
+        state.tokenize = jsTokenBase;
+      return ret("string", "string");
+    };
+  }
+
+  function jsTokenComment(stream, state) {
+    var maybeEnd = false, ch;
+    while (ch = stream.next()) {
+      if (ch == "/" && maybeEnd) {
+        state.tokenize = jsTokenBase;
+        break;
+      }
+      maybeEnd = (ch == "*");
+    }
+    return ret("comment", "comment");
+  }
+
+  // Parser
+
+  var atomicTypes = {"atom": true, "number": true, "variable": true, "string": true, "regexp": true};
+
+  function JSLexical(indented, column, type, align, prev, info) {
+    this.indented = indented;
+    this.column = column;
+    this.type = type;
+    this.prev = prev;
+    this.info = info;
+    if (align != null) this.align = align;
+  }
+
+  function inScope(state, varname) {
+    for (var v = state.localVars; v; v = v.next)
+      if (v.name == varname) return true;
+  }
+
+  function parseJS(state, style, type, content, stream) {
+    var cc = state.cc;
+    // Communicate our context to the combinators.
+    // (Less wasteful than consing up a hundred closures on every call.)
+    cx.state = state; cx.stream = stream; cx.marked = null, cx.cc = cc;
+  
+    if (!state.lexical.hasOwnProperty("align"))
+      state.lexical.align = true;
+
+    while(true) {
+      var combinator = cc.length ? cc.pop() : jsonMode ? expression : statement;
+      if (combinator(type, content)) {
+        while(cc.length && cc[cc.length - 1].lex)
+          cc.pop()();
+        if (cx.marked) return cx.marked;
+        if (type == "variable" && inScope(state, content)) return "variable-2";
+        return style;
+      }
+    }
+  }
+
+  // Combinator utils
+
+  var cx = {state: null, column: null, marked: null, cc: null};
+  function pass() {
+    for (var i = arguments.length - 1; i >= 0; i--) cx.cc.push(arguments[i]);
+  }
+  function cont() {
+    pass.apply(null, arguments);
+    return true;
+  }
+  function register(varname) {
+    var state = cx.state;
+    if (state.context) {
+      cx.marked = "def";
+      for (var v = state.localVars; v; v = v.next)
+        if (v.name == varname) return;
+      state.localVars = {name: varname, next: state.localVars};
+    }
+  }
+
+  // Combinators
+
+  var defaultVars = {name: "this", next: {name: "arguments"}};
+  function pushcontext() {
+    if (!cx.state.context) cx.state.localVars = defaultVars;
+    cx.state.context = {prev: cx.state.context, vars: cx.state.localVars};
+  }
+  function popcontext() {
+    cx.state.localVars = cx.state.context.vars;
+    cx.state.context = cx.state.context.prev;
+  }
+  function pushlex(type, info) {
+    var result = function() {
+      var state = cx.state;
+      state.lexical = new JSLexical(state.indented, cx.stream.column(), type, null, state.lexical, info)
+    };
+    result.lex = true;
+    return result;
+  }
+  function poplex() {
+    var state = cx.state;
+    if (state.lexical.prev) {
+      if (state.lexical.type == ")")
+        state.indented = state.lexical.indented;
+      state.lexical = state.lexical.prev;
+    }
+  }
+  poplex.lex = true;
+
+  function expect(wanted) {
+    return function expecting(type) {
+      if (type == wanted) return cont();
+      else if (wanted == ";") return pass();
+      else return cont(arguments.callee);
+    };
+  }
+
+  function statement(type) {
+    if (type == "var") return cont(pushlex("vardef"), vardef1, expect(";"), poplex);
+    if (type == "keyword a") return cont(pushlex("form"), expression, statement, poplex);
+    if (type == "keyword b") return cont(pushlex("form"), statement, poplex);
+    if (type == "{") return cont(pushlex("}"), block, poplex);
+    if (type == ";") return cont();
+    if (type == "function") return cont(functiondef);
+    if (type == "for") return cont(pushlex("form"), expect("("), pushlex(")"), forspec1, expect(")"),
+                                      poplex, statement, poplex);
+    if (type == "variable") return cont(pushlex("stat"), maybelabel);
+    if (type == "switch") return cont(pushlex("form"), expression, pushlex("}", "switch"), expect("{"),
+                                         block, poplex, poplex);
+    if (type == "case") return cont(expression, expect(":"));
+    if (type == "default") return cont(expect(":"));
+    if (type == "catch") return cont(pushlex("form"), pushcontext, expect("("), funarg, expect(")"),
+                                        statement, poplex, popcontext);
+    return pass(pushlex("stat"), expression, expect(";"), poplex);
+  }
+  function expression(type) {
+    if (atomicTypes.hasOwnProperty(type)) return cont(maybeoperator);
+    if (type == "function") return cont(functiondef);
+    if (type == "keyword c") return cont(maybeexpression);
+    if (type == "(") return cont(pushlex(")"), maybeexpression, expect(")"), poplex, maybeoperator);
+    if (type == "operator") return cont(expression);
+    if (type == "[") return cont(pushlex("]"), commasep(expression, "]"), poplex, maybeoperator);
+    if (type == "{") return cont(pushlex("}"), commasep(objprop, "}"), poplex, maybeoperator);
+    return cont();
+  }
+  function maybeexpression(type) {
+    if (type.match(/[;\}\)\],]/)) return pass();
+    return pass(expression);
+  }
+    
+  function maybeoperator(type, value) {
+    if (type == "operator" && /\+\+|--/.test(value)) return cont(maybeoperator);
+    if (type == "operator" || type == ":") return cont(expression);
+    if (type == ";") return;
+    if (type == "(") return cont(pushlex(")"), commasep(expression, ")"), poplex, maybeoperator);
+    if (type == ".") return cont(property, maybeoperator);
+    if (type == "[") return cont(pushlex("]"), expression, expect("]"), poplex, maybeoperator);
+  }
+  function maybelabel(type) {
+    if (type == ":") return cont(poplex, statement);
+    return pass(maybeoperator, expect(";"), poplex);
+  }
+  function property(type) {
+    if (type == "variable") {cx.marked = "property"; return cont();}
+  }
+  function objprop(type) {
+    if (type == "variable") cx.marked = "property";
+    if (atomicTypes.hasOwnProperty(type)) return cont(expect(":"), expression);
+  }
+  function commasep(what, end) {
+    function proceed(type) {
+      if (type == ",") return cont(what, proceed);
+      if (type == end) return cont();
+      return cont(expect(end));
+    }
+    return function commaSeparated(type) {
+      if (type == end) return cont();
+      else return pass(what, proceed);
+    };
+  }
+  function block(type) {
+    if (type == "}") return cont();
+    return pass(statement, block);
+  }
+  function vardef1(type, value) {
+    if (type == "variable"){register(value); return cont(vardef2);}
+    return cont();
+  }
+  function vardef2(type, value) {
+    if (value == "=") return cont(expression, vardef2);
+    if (type == ",") return cont(vardef1);
+  }
+  function forspec1(type) {
+    if (type == "var") return cont(vardef1, forspec2);
+    if (type == ";") return pass(forspec2);
+    if (type == "variable") return cont(formaybein);
+    return pass(forspec2);
+  }
+  function formaybein(type, value) {
+    if (value == "in") return cont(expression);
+    return cont(maybeoperator, forspec2);
+  }
+  function forspec2(type, value) {
+    if (type == ";") return cont(forspec3);
+    if (value == "in") return cont(expression);
+    return cont(expression, expect(";"), forspec3);
+  }
+  function forspec3(type) {
+    if (type != ")") cont(expression);
+  }
+  function functiondef(type, value) {
+    if (type == "variable") {register(value); return cont(functiondef);}
+    if (type == "(") return cont(pushlex(")"), pushcontext, commasep(funarg, ")"), poplex, statement, popcontext);
+  }
+  function funarg(type, value) {
+    if (type == "variable") {register(value); return cont();}
+  }
+
+  // Interface
+
+  return {
+    startState: function(basecolumn) {
+      return {
+        tokenize: jsTokenBase,
+        reAllowed: true,
+        kwAllowed: true,
+        cc: [],
+        lexical: new JSLexical((basecolumn || 0) - indentUnit, 0, "block", false),
+        localVars: parserConfig.localVars,
+        context: parserConfig.localVars && {vars: parserConfig.localVars},
+        indented: 0
+      };
+    },
+
+    token: function(stream, state) {
+      if (stream.sol()) {
+        if (!state.lexical.hasOwnProperty("align"))
+          state.lexical.align = false;
+        state.indented = stream.indentation();
+      }
+      if (stream.eatSpace()) return null;
+      var style = state.tokenize(stream, state);
+      if (type == "comment") return style;
+      state.reAllowed = !!(type == "operator" || type == "keyword c" || type.match(/^[\[{}\(,;:]$/));
+      state.kwAllowed = type != '.';
+      return parseJS(state, style, type, content, stream);
+    },
+
+    indent: function(state, textAfter) {
+      if (state.tokenize != jsTokenBase) return 0;
+      var firstChar = textAfter && textAfter.charAt(0), lexical = state.lexical;
+      if (lexical.type == "stat" && firstChar == "}") lexical = lexical.prev;
+      var type = lexical.type, closing = firstChar == type;
+      if (type == "vardef") return lexical.indented + 4;
+      else if (type == "form" && firstChar == "{") return lexical.indented;
+      else if (type == "stat" || type == "form") return lexical.indented + indentUnit;
+      else if (lexical.info == "switch" && !closing)
+        return lexical.indented + (/^(?:case|default)\b/.test(textAfter) ? indentUnit : 2 * indentUnit);
+      else if (lexical.align) return lexical.column + (closing ? 0 : 1);
+      else return lexical.indented + (closing ? 0 : indentUnit);
+    },
+
+    electricChars: ":{}"
+  };
+});
+
+CodeMirror.defineMIME("text/javascript", "javascript");
+CodeMirror.defineMIME("application/json", {name: "javascript", json: true});
+;
+
+CodeMirror.defineMode("markdown", function(cmCfg, modeCfg) {
+
+  var htmlFound = CodeMirror.mimeModes.hasOwnProperty("text/html");
+  var htmlMode = CodeMirror.getMode(cmCfg, htmlFound ? "text/html" : "text/plain");
+
+  var header   = 'header'
+  ,   code     = 'comment'
+  ,   quote    = 'quote'
+  ,   list     = 'string'
+  ,   hr       = 'hr'
+  ,   linktext = 'link'
+  ,   linkhref = 'string'
+  ,   em       = 'em'
+  ,   strong   = 'strong'
+  ,   emstrong = 'emstrong';
+
+  var hrRE = /^([*\-=_])(?:\s*\1){2,}\s*$/
+  ,   ulRE = /^[*\-+]\s+/
+  ,   olRE = /^[0-9]+\.\s+/
+  ,   headerRE = /^(?:\={3,}|-{3,})$/
+  ,   textRE = /^[^\[*_\\<>`]+/;
+
+  function switchInline(stream, state, f) {
+    state.f = state.inline = f;
+    return f(stream, state);
+  }
+
+  function switchBlock(stream, state, f) {
+    state.f = state.block = f;
+    return f(stream, state);
+  }
+
+
+  // Blocks
+
+  function blankLine(state) {
+    // Reset EM state
+    state.em = false;
+    // Reset STRONG state
+    state.strong = false;
+    if (!htmlFound && state.f == htmlBlock) {
+      state.f = inlineNormal;
+      state.block = blockNormal;
+    }
+    return null;
+  }
+
+  function blockNormal(stream, state) {
+    var match;
+    if (state.indentationDiff >= 4) {
+      state.indentation -= state.indentationDiff;
+      stream.skipToEnd();
+      return code;
+    } else if (stream.eatSpace()) {
+      return null;
+    } else if (stream.peek() === '#' || stream.match(headerRE)) {
+      state.header = true;
+    } else if (stream.eat('>')) {
+      state.indentation++;
+      state.quote = true;
+    } else if (stream.peek() === '[') {
+      return switchInline(stream, state, footnoteLink);
+    } else if (stream.match(hrRE, true)) {
+      return hr;
+    } else if (match = stream.match(ulRE, true) || stream.match(olRE, true)) {
+      state.indentation += match[0].length;
+      return list;
+    }
+    
+    return switchInline(stream, state, state.inline);
+  }
+
+  function htmlBlock(stream, state) {
+    var style = htmlMode.token(stream, state.htmlState);
+    if (htmlFound && style === 'tag' && state.htmlState.type !== 'openTag' && !state.htmlState.context) {
+      state.f = inlineNormal;
+      state.block = blockNormal;
+    }
+    if (state.md_inside && stream.current().indexOf(">")!=-1) {
+      state.f = inlineNormal;
+      state.block = blockNormal;
+      state.htmlState.context = undefined;
+    }
+    return style;
+  }
+
+
+  // Inline
+  function getType(state) {
+    var styles = [];
+    
+    if (state.strong) { styles.push(state.em ? emstrong : strong); }
+    else if (state.em) { styles.push(em); }
+    
+    if (state.header) { styles.push(header); }
+    if (state.quote) { styles.push(quote); }
+
+    return styles.length ? styles.join(' ') : null;
+  }
+
+  function handleText(stream, state) {
+    if (stream.match(textRE, true)) {
+      return getType(state);
+    }
+    return undefined;        
+  }
+
+  function inlineNormal(stream, state) {
+    var style = state.text(stream, state)
+    if (typeof style !== 'undefined')
+      return style;
+    
+    var ch = stream.next();
+    
+    if (ch === '\\') {
+      stream.next();
+      return getType(state);
+    }
+    if (ch === '`') {
+      return switchInline(stream, state, inlineElement(code, '`'));
+    }
+    if (ch === '[') {
+      return switchInline(stream, state, linkText);
+    }
+    if (ch === '<' && stream.match(/^\w/, false)) {
+      var md_inside = false;
+      if (stream.string.indexOf(">")!=-1) {
+        var atts = stream.string.substring(1,stream.string.indexOf(">"));
+        if (/markdown\s*=\s*('|"){0,1}1('|"){0,1}/.test(atts)) {
+          state.md_inside = true;
+        }
+      }
+      stream.backUp(1);
+      return switchBlock(stream, state, htmlBlock);
+    }
+      
+    if (ch === '<' && stream.match(/^\/\w*?>/)) {
+      state.md_inside = false;
+      return "tag";
+    }
+      
+    var t = getType(state);
+    if (ch === '*' || ch === '_') {
+      if (stream.eat(ch)) {
+        return (state.strong = !state.strong) ? getType(state) : t;
+      }
+      return (state.em = !state.em) ? getType(state) : t;
+    }
+    
+    return getType(state);
+  }
+
+  function linkText(stream, state) {
+    while (!stream.eol()) {
+      var ch = stream.next();
+      if (ch === '\\') stream.next();
+      if (ch === ']') {
+        state.inline = state.f = linkHref;
+        return linktext;
+      }
+    }
+    return linktext;
+  }
+
+  function linkHref(stream, state) {
+    stream.eatSpace();
+    var ch = stream.next();
+    if (ch === '(' || ch === '[') {
+      return switchInline(stream, state, inlineElement(linkhref, ch === '(' ? ')' : ']'));
+    }
+    return 'error';
+  }
+
+  function footnoteLink(stream, state) {
+    if (stream.match(/^[^\]]*\]:/, true)) {
+      state.f = footnoteUrl;
+      return linktext;
+    }
+    return switchInline(stream, state, inlineNormal);
+  }
+
+  function footnoteUrl(stream, state) {
+    stream.eatSpace();
+    stream.match(/^[^\s]+/, true);
+    state.f = state.inline = inlineNormal;
+    return linkhref;
+  }
+
+  function inlineRE(endChar) {
+    if (!inlineRE[endChar]) {
+      // match any not-escaped-non-endChar and any escaped char
+      // then match endChar or eol
+      inlineRE[endChar] = new RegExp('^(?:[^\\\\\\' + endChar + ']|\\\\.)*(?:\\' + endChar + '|$)');
+    }
+    return inlineRE[endChar];
+  }
+
+  function inlineElement(type, endChar, next) {
+    next = next || inlineNormal;
+    return function(stream, state) {
+      stream.match(inlineRE(endChar));
+      state.inline = state.f = next;
+      return type;
+    };
+  }
+
+  return {
+    startState: function() {
+      return {
+        f: blockNormal,
+        
+        block: blockNormal,
+        htmlState: CodeMirror.startState(htmlMode),
+        indentation: 0,
+        
+        inline: inlineNormal,
+        text: handleText,
+        em: false,
+        strong: false,
+        header: false,
+        quote: false
+      };
+    },
+
+    copyState: function(s) {
+      return {
+        f: s.f,
+        
+        block: s.block,
+        htmlState: CodeMirror.copyState(htmlMode, s.htmlState),
+        indentation: s.indentation,
+          
+        inline: s.inline,
+        text: s.text,
+        em: s.em,
+        strong: s.strong,
+        header: s.header,
+        quote: s.quote,
+        md_inside: s.md_inside
+      };
+    },
+
+    token: function(stream, state) {
+      if (stream.sol()) {
+        if (stream.match(/^\s*$/, true)) { return blankLine(state); }
+
+        // Reset state.header
+        state.header = false;
+        // Reset state.quote
+        state.quote = false;
+
+        state.f = state.block;
+        var indentation = stream.match(/^\s*/, true)[0].replace(/\t/g, '    ').length;
+        state.indentationDiff = indentation - state.indentation;
+        state.indentation = indentation;
+        if (indentation > 0) { return null; }
+      }
+      return state.f(stream, state);
+    },
+
+    blankLine: blankLine,
+
+    getType: getType
+  };
+
+}, "xml");
+
+CodeMirror.defineMIME("text/x-markdown", "markdown");
+;
+

@@ -181,9 +181,21 @@ window.require.define({"models/file": function(exports, require, module) {
       return this.get('type') === 'directory';
     };
 
+    File.prototype.isView = function() {
+      return this.get('name').match(/\.eco$/);
+    };
+
     File.prototype.codeMode = function() {
-      if (this.get('name') && this.get('name').match(/\.coffee$/)) {
-        return "coffeescript";
+      if (this.get('name')) {
+        if (this.get('name').match(/\.coffee$/)) {
+          return "coffeescript";
+        } else if (this.get('name').match(/\.js$/)) {
+          return "javascript";
+        } else if (this.get('name').match(/\.s?css$/)) {
+          return "css";
+        } else if (this.get('name').match(/\.(md|markdown|mdown)$/)) {
+          return "markdown";
+        }
       } else {
         return "text";
       }
@@ -325,15 +337,8 @@ window.require.define({"models/project": function(exports, require, module) {
           path: "/",
           project: this
         });
-        this.rootFolder.url = [app.baseUrl, "projects", this.get('id'), "files"].join("/");
-        this.rootFolder.url += "?path=/";
-        this.rootFolder.on('reset', this.triggerEvents, this);
         return this.rootFolder.fetch();
       }
-    };
-
-    Project.prototype.triggerEvents = function() {
-      return this.trigger('change');
     };
 
     return Project;
@@ -822,7 +827,13 @@ window.require.define({"views/templates/file": function(exports, require, module
           __out.push(__sanitize(this.file.get('name')));
           __out.push('\n\n    ');
         } else {
-          __out.push('\n      <i class="icon-file"></i> ');
+          __out.push('\n      ');
+          if (this.file.isView()) {
+            __out.push('\n        <i class="icon-eye-open"></i> \n      ');
+          } else {
+            __out.push('\n        <i class="icon-file"></i> \n      ');
+          }
+          __out.push('\n\n      ');
           __out.push(__sanitize(this.file.get('name')));
           __out.push('\n    ');
         }
@@ -878,58 +889,7 @@ window.require.define({"views/templates/filebrowser": function(exports, require,
     (function() {
       (function() {
       
-        __out.push('<ul class="nav nav-list">\n  <li class="nav-header"> Open Files </li>\n</ul>\n<ul class="nav nav-list" id="open_files"></ul>\n\n<ul class="nav nav-list">\n  <li class="nav-header">Project</li>\n</ul>\n<div class="nav nav-list" id="project_files"></div>');
-      
-      }).call(this);
-      
-    }).call(__obj);
-    __obj.safe = __objSafe, __obj.escape = __escape;
-    return __out.join('');
-  }
-}});
-
-window.require.define({"views/templates/files_view": function(exports, require, module) {
-  module.exports = function (__obj) {
-    if (!__obj) __obj = {};
-    var __out = [], __capture = function(callback) {
-      var out = __out, result;
-      __out = [];
-      callback.call(this);
-      result = __out.join('');
-      __out = out;
-      return __safe(result);
-    }, __sanitize = function(value) {
-      if (value && value.ecoSafe) {
-        return value;
-      } else if (typeof value !== 'undefined' && value != null) {
-        return __escape(value);
-      } else {
-        return '';
-      }
-    }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
-    __safe = __obj.safe = function(value) {
-      if (value && value.ecoSafe) {
-        return value;
-      } else {
-        if (!(typeof value !== 'undefined' && value != null)) value = '';
-        var result = new String(value);
-        result.ecoSafe = true;
-        return result;
-      }
-    };
-    if (!__escape) {
-      __escape = __obj.escape = function(value) {
-        return ('' + value)
-          .replace(/&/g, '&amp;')
-          .replace(/</g, '&lt;')
-          .replace(/>/g, '&gt;')
-          .replace(/"/g, '&quot;');
-      };
-    }
-    (function() {
-      (function() {
-      
-      
+        __out.push('<ul class="nav nav-list">\n  <li class="nav-header"> Open Files </li>\n</ul>\n<div class="nav nav-list" id="open_files"></div>\n\n<ul class="nav nav-list">\n  <li class="nav-header">Project</li>\n</ul>\n<div class="nav nav-list" id="project_files"></div>');
       
       }).call(this);
       

@@ -1,14 +1,20 @@
 Model = require './model'
 
 module.exports = class File extends Model
-  # urlRoot: -> 
-  #   "#{app.baseUrl}/#{@project.apiPath}/#{@project.get('id')}/files/#{@cwd}"
   isDirectory: -> @get('type') == 'directory'
+  isView: -> @get('name').match /\.eco$/
 
   # Returns the code editor mode to run
   codeMode: ->
-    if @get('name') and @get('name').match /\.coffee$/
-      "coffeescript"
+    if @get('name')
+      if @get('name').match /\.coffee$/
+        "coffeescript"
+      else if @get('name').match /\.js$/
+        "javascript"
+      else if @get('name').match /\.s?css$/
+        "css"
+      else if @get('name').match /\.(md|markdown|mdown)$/
+        "markdown"
     else
       "text"
 
