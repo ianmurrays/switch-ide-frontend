@@ -506,6 +506,8 @@ window.require.define({"views/file_view": function(exports, require, module) {
 
     FileView.prototype.directory = null;
 
+    FileView.prototype.allowClose = false;
+
     FileView.prototype.events = function() {
       var events;
       events = {};
@@ -513,7 +515,12 @@ window.require.define({"views/file_view": function(exports, require, module) {
       return events;
     };
 
-    FileView.prototype.initialize = function() {
+    FileView.prototype.initialize = function(attr, options) {
+      if (options) {
+        if (options.allowClose) {
+          this.allowClose = options.allowClose;
+        }
+      }
       return this.model.on('all', this.render, this);
     };
 
@@ -533,6 +540,23 @@ window.require.define({"views/file_view": function(exports, require, module) {
         });
       }
       return this;
+    };
+
+    FileView.prototype.markAsActive = function() {
+      return this.$el.addClass('active');
+    };
+
+    FileView.prototype.unmarkAsActive = function() {
+      return this.$el.removeClass('active');
+    };
+
+    FileView.prototype.removeFromList = function() {
+      if (!this.allowClose) {
+        return;
+      }
+      console.log("removing!");
+      this.remove();
+      return Backbone.Mediator.pub("filebrowser:close_file", this.model);
     };
 
     FileView.prototype.open = function(e) {
@@ -555,7 +579,8 @@ window.require.define({"views/file_view": function(exports, require, module) {
       } else {
         console.log("Opening file " + (this.model.get('name')));
         app.code_editor.setFile(this.model);
-        return this.model.fetchContent();
+        this.model.fetchContent();
+        return Backbone.Mediator.pub("filebrowser:open_file", this.model);
       }
     };
 
@@ -586,8 +611,12 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
 
     FilebrowserView.prototype.template = require('./templates/filebrowser');
 
+    FilebrowserView.prototype.openFiles = {};
+
     FilebrowserView.prototype.initialize = function() {
-      return this.setModel(this.model || new Project());
+      this.setModel(this.model || new Project());
+      Backbone.Mediator.sub("filebrowser:open_file", this.addFile, this);
+      return Backbone.Mediator.sub("filebrowser:close_file", this.removeFile, this);
     };
 
     FilebrowserView.prototype.setModel = function(model) {
@@ -607,6 +636,27 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
         return _this.$('#project_files').append(file_view.render().el);
       });
       return this;
+    };
+
+    FilebrowserView.prototype.addFile = function(file) {
+      if (!_.has(this.openFiles, file.fullPath())) {
+        this.openFiles[file.fullPath()] = new FileView({
+          model: file
+        }, {
+          allowClose: true
+        });
+        this.$('#open_files').append(this.openFiles[file.fullPath()].render().el);
+      }
+      _.each(this.openFiles, function(view) {
+        return view.unmarkAsActive();
+      });
+      return this.openFiles[file.fullPath()].markAsActive();
+    };
+
+    FilebrowserView.prototype.removeFile = function(file) {
+      if (_.has(this.openFiles, file.fullPath())) {
+        return delete this.openFiles[file.fullPath()];
+      }
     };
 
     return FilebrowserView;
@@ -889,7 +939,7 @@ window.require.define({"views/templates/filebrowser": function(exports, require,
     (function() {
       (function() {
       
-        __out.push('<ul class="nav nav-list">\n  <li class="nav-header"> Open Files </li>\n</ul>\n<div class="nav nav-list" id="open_files"></div>\n\n<ul class="nav nav-list">\n  <li class="nav-header">Project</li>\n</ul>\n<div class="nav nav-list" id="project_files"></div>');
+        __out.push('<ul class="nav nav-list">\n  <li class="nav-header"> Open Files </li>\n</ul>\n<div class="nav nav-list" id="open_files"></div>\n\n<ul class="nav nav-list">\n  <li class="nav-header">Project</li>\n</ul>\n<div class="nav nav-list" id="project_files"></div>\n');
       
       }).call(this);
       

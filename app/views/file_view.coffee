@@ -5,15 +5,20 @@ module.exports = class FileView extends Backbone.View
   tagName: "div"
   className: "file-container"
   directory: null
+  allowClose: no
 
   # Since we're embedding views into views,
   # we need to make links unique
   events: ->
     events = {}
+    # events["dblclick a#cid_#{@model.cid} i"] = "removeFromList"
     events["click a#cid_#{@model.cid}"] = "open"
     events
 
-  initialize: ->
+  initialize: (attr, options) ->
+    if options
+      @allowClose = options.allowClose if options.allowClose
+
     @model.on 'all', @render, this
 
   render: ->
@@ -25,6 +30,19 @@ module.exports = class FileView extends Backbone.View
         @$('.subdirectory').first().append file_view.render().el
 
     this
+
+  markAsActive: -> @$el.addClass('active')
+  unmarkAsActive: -> @$el.removeClass('active')
+
+  # Should only call itself when the view is being shown
+  # on the "Open Files" list
+  removeFromList: ->
+    return unless @allowClose
+
+    console.log "removing!"
+    @remove()
+
+    Backbone.Mediator.pub "filebrowser:close_file", @model
 
   open: (e) ->
     e.preventDefault()
@@ -46,3 +64,7 @@ module.exports = class FileView extends Backbone.View
       console.log "Opening file #{@model.get('name')}"
       app.code_editor.setFile @model
       @model.fetchContent()
+
+      # This adds the file to the open file list
+      Backbone.Mediator.pub "filebrowser:open_file", @model
+
