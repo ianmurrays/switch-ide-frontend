@@ -191,10 +191,20 @@ window.require.define({"models/file": function(exports, require, module) {
           return "coffeescript";
         } else if (this.get('name').match(/\.js$/)) {
           return "javascript";
+        } else if (this.get('name').match(/\.json/)) {
+          return {
+            name: "javascript",
+            json: true
+          };
         } else if (this.get('name').match(/\.s?css$/)) {
           return "css";
         } else if (this.get('name').match(/\.(md|markdown|mdown)$/)) {
           return "markdown";
+        } else if (this.get('name').match(/\.html?$/)) {
+          return {
+            name: "xml",
+            htmlMode: true
+          };
         }
       } else {
         return "text";

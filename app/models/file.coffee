@@ -11,10 +11,14 @@ module.exports = class File extends Model
         "coffeescript"
       else if @get('name').match /\.js$/
         "javascript"
+      else if @get('name').match /\.json/
+        {name: "javascript", json: yes}
       else if @get('name').match /\.s?css$/
         "css"
       else if @get('name').match /\.(md|markdown|mdown)$/
         "markdown"
+      else if @get('name').match /\.html?$/
+        {name: "xml", htmlMode: yes}
     else
       "text"
 
