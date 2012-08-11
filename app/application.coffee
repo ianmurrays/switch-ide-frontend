@@ -3,6 +3,7 @@ Navbar = require 'views/navbar_view'
 Filebrowser = require 'views/filebrowser_view'
 CodeEditor = require 'views/code_editor_view'
 Projects = require 'models/projects'
+Logger = require 'logger'
 
 module.exports = class Application
   baseUrl: 'http://localhost:3000'
@@ -14,11 +15,21 @@ module.exports = class Application
 
   initialize: ->
     @router = new Router
+    @logger = new Logger
+    @logger.logging = on # Disable in production
 
     @renderEssentialComponents()
+    @setupShortcuts()
 
     # Need to do this everytime the window is resized.
     $(window).resize => @resizeComponents()
+
+  # Setup global shortcuts, other components should setup their
+  # own shortcuts
+  setupShortcuts: ->
+    # Mousetrap.bind ['command+s', 'ctrl+s'], (e) => 
+    #   e.preventDefault()
+    #   @logger.log "Shortcut CMD+S trapped"
 
   renderEssentialComponents: ->
     # Navbar

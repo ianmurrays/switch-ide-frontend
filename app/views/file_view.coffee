@@ -39,7 +39,7 @@ module.exports = class FileView extends Backbone.View
   removeFromList: ->
     return unless @allowClose
 
-    console.log "removing!"
+    app.logger.log "removing!"
     @remove()
 
     Backbone.Mediator.pub "filebrowser:close_file", @model
@@ -51,17 +51,17 @@ module.exports = class FileView extends Backbone.View
       # Is it open?
       if @directory
         # Close it
-        console.log "Closing directory #{@model.get('name')}"
+        app.logger.log "Closing directory #{@model.get('name')}"
         @directory.off 'all'
         @directory = null
         @render()
       else
-        console.log "Opening directory #{@model.get('name')}"
+        app.logger.log "Opening directory #{@model.get('name')}"
         @directory = new Files null, project: @model.project, path: @model.fullPath()
         @directory.on 'reset', @render, this
         @directory.fetch()
     else
-      console.log "Opening file #{@model.get('name')}"
+      app.logger.log "Opening file #{@model.get('name')}"
       app.code_editor.setFile @model
       @model.fetchContent()
 

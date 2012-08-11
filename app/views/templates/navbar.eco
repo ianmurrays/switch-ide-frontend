@@ -39,5 +39,9 @@
     <div class="progress progress-striped active pull-right" style="display: none;">
       <div class="bar" style="width: 100%;"></div>
     </div>
+
+    <div class="pull-right">
+      <p class="switch-status" style="display: none;"></p>
+    </div>
   </div>
 </div>

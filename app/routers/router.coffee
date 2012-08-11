@@ -10,7 +10,7 @@ module.exports = class Router extends Backbone.Router
     '*all': 'redirect'
 
   index: ->
-    console.log "Router#index"
+    app.logger.log "Router#index"
     # We load projects and show them on a modal window
     projects = new Projects()
     
@@ -23,7 +23,7 @@ module.exports = class Router extends Backbone.Router
     projects.fetch()
 
   project: (id) ->
-    console.log "Router#project"
+    app.logger.log "Router#project"
     project = new Project(id: id)
     app.filebrowser.setModel project
     project.fetch()
@@ -31,5 +31,5 @@ module.exports = class Router extends Backbone.Router
     Backbone.Mediator.pub 'modal:hide'
 
   redirect: -> 
-    console.log "Router#redirect"
+    app.logger.log "Router#redirect"
     @navigate ''

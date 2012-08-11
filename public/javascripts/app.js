@@ -75,7 +75,7 @@
 })();
 
 window.require.define({"application": function(exports, require, module) {
-  var Application, CodeEditor, Filebrowser, Navbar, Projects, Router;
+  var Application, CodeEditor, Filebrowser, Logger, Navbar, Projects, Router;
 
   Router = require('routers/router');
 
@@ -86,6 +86,8 @@ window.require.define({"application": function(exports, require, module) {
   CodeEditor = require('views/code_editor_view');
 
   Projects = require('models/projects');
+
+  Logger = require('logger');
 
   module.exports = Application = (function() {
 
@@ -104,11 +106,16 @@ window.require.define({"application": function(exports, require, module) {
     Application.prototype.initialize = function() {
       var _this = this;
       this.router = new Router;
+      this.logger = new Logger;
+      this.logger.logging = true;
       this.renderEssentialComponents();
+      this.setupShortcuts();
       return $(window).resize(function() {
         return _this.resizeComponents();
       });
     };
+
+    Application.prototype.setupShortcuts = function() {};
 
     Application.prototype.renderEssentialComponents = function() {
       var navbar;
@@ -137,6 +144,31 @@ window.require.define({"application": function(exports, require, module) {
   })();
 
   window.app = new Application;
+  
+}});
+
+window.require.define({"logger": function(exports, require, module) {
+  var Logger;
+
+  module.exports = Logger = (function() {
+
+    function Logger() {}
+
+    Logger.prototype.logging = false;
+
+    Logger.prototype.log = function() {
+      var args;
+      if (this.logging) {
+        args = _.map(arguments, function(arg) {
+          return arg;
+        });
+        return console.log("[SwitchIDE] " + args.join(" "));
+      }
+    };
+
+    return Logger;
+
+  })();
   
 }});
 
@@ -218,19 +250,43 @@ window.require.define({"models/file": function(exports, require, module) {
       return "" + (this.get('parent')) + "/" + (this.get('name'));
     };
 
+    File.prototype.railsPath = function(method) {
+      var path;
+      path = [app.baseUrl, "projects", 9, "files", method].join("/");
+      return path += "?path=" + ([this.get('parent'), this.get('name')].join("/"));
+    };
+
     File.prototype.fetchContent = function() {
-      var path,
-        _this = this;
+      var _this = this;
       if (this.isDirectory()) {
         return;
       }
-      path = [app.baseUrl, "projects", 9, "files", "get_content"].join("/");
-      path += "?path=" + ([this.get('parent'), this.get('name')].join("/"));
-      return $.getJSON(path, function(data) {
+      return $.getJSON(this.railsPath('get_content'), function(data) {
         _this.set('content', data.content, {
           silent: true
         });
         return _this.trigger('change:content');
+      });
+    };
+
+    File.prototype.updateContent = function() {
+      var _this = this;
+      if (this.isDirectory()) {
+        return;
+      }
+      return $.ajax({
+        url: this.railsPath('save_content'),
+        type: 'PUT',
+        data: {
+          content: this.get('content')
+        },
+        success: function(data) {
+          _this.set('content', data.content, {
+            silent: true
+          });
+          _this.trigger('change:content');
+          return Backbone.Mediator.pub("status:set", "Saved " + (_this.get('name')));
+        }
       });
     };
 
@@ -417,7 +473,7 @@ window.require.define({"routers/router": function(exports, require, module) {
 
     Router.prototype.index = function() {
       var projects, projectsView;
-      console.log("Router#index");
+      app.logger.log("Router#index");
       projects = new Projects();
       projectsView = new ProjectsView({
         collection: projects
@@ -432,7 +488,7 @@ window.require.define({"routers/router": function(exports, require, module) {
 
     Router.prototype.project = function(id) {
       var project;
-      console.log("Router#project");
+      app.logger.log("Router#project");
       project = new Project({
         id: id
       });
@@ -442,7 +498,7 @@ window.require.define({"routers/router": function(exports, require, module) {
     };
 
     Router.prototype.redirect = function() {
-      console.log("Router#redirect");
+      app.logger.log("Router#redirect");
       return this.navigate('');
     };
 
@@ -469,14 +525,31 @@ window.require.define({"views/code_editor_view": function(exports, require, modu
 
     CodeEditorView.prototype.className = 'code-editor';
 
+    CodeEditorView.prototype.placeholderModel = true;
+
     CodeEditorView.prototype.initialize = function() {
-      return this.model || (this.model = new File());
+      var _this = this;
+      this.model || (this.model = new File);
+      return Mousetrap.bind(['ctrl+s', 'command+s'], function(e) {
+        e.preventDefault();
+        return _this.updateAndSave();
+      });
+    };
+
+    CodeEditorView.prototype.updateAndSave = function() {
+      if (this.placeholderModel) {
+        return;
+      }
+      this.model.set('content', this.codemirror.getValue());
+      return this.model.updateContent();
     };
 
     CodeEditorView.prototype.setFile = function(file) {
+      this.updateAndSave();
       this.model.off('change:content', this);
       this.model = file;
-      return this.model.on('change:content', this.updateContent, this);
+      this.model.on('change:content', this.updateContent, this);
+      return this.placeholderModel = false;
     };
 
     CodeEditorView.prototype.updateContent = function() {
@@ -490,6 +563,7 @@ window.require.define({"views/code_editor_view": function(exports, require, modu
         value: this.model.get('content'),
         lineNumbers: true
       });
+      this.$('textarea').addClass("mousetrap");
       return this;
     };
 
@@ -570,7 +644,7 @@ window.require.define({"views/file_view": function(exports, require, module) {
       if (!this.allowClose) {
         return;
       }
-      console.log("removing!");
+      app.logger.log("removing!");
       this.remove();
       return Backbone.Mediator.pub("filebrowser:close_file", this.model);
     };
@@ -579,12 +653,12 @@ window.require.define({"views/file_view": function(exports, require, module) {
       e.preventDefault();
       if (this.model.isDirectory()) {
         if (this.directory) {
-          console.log("Closing directory " + (this.model.get('name')));
+          app.logger.log("Closing directory " + (this.model.get('name')));
           this.directory.off('all');
           this.directory = null;
           return this.render();
         } else {
-          console.log("Opening directory " + (this.model.get('name')));
+          app.logger.log("Opening directory " + (this.model.get('name')));
           this.directory = new Files(null, {
             project: this.model.project,
             path: this.model.fullPath()
@@ -593,7 +667,7 @@ window.require.define({"views/file_view": function(exports, require, module) {
           return this.directory.fetch();
         }
       } else {
-        console.log("Opening file " + (this.model.get('name')));
+        app.logger.log("Opening file " + (this.model.get('name')));
         app.code_editor.setFile(this.model);
         this.model.fetchContent();
         return Backbone.Mediator.pub("filebrowser:open_file", this.model);
@@ -643,7 +717,7 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
 
     FilebrowserView.prototype.render = function() {
       var _this = this;
-      console.log("FilebrowserView#render");
+      app.logger.log("FilebrowserView#render");
       this.$el.html(this.template);
       this.model.rootFolder.each(function(file) {
         var file_view;
@@ -684,6 +758,7 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
 
 window.require.define({"views/navbar_view": function(exports, require, module) {
   var NavbarView,
+    __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -692,12 +767,50 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
     __extends(NavbarView, _super);
 
     function NavbarView() {
+      this.cycleStatuses = __bind(this.cycleStatuses, this);
       return NavbarView.__super__.constructor.apply(this, arguments);
     }
 
     NavbarView.prototype.className = "navbar navbar-fixed-top";
 
     NavbarView.prototype.template = require('./templates/navbar');
+
+    NavbarView.prototype.statuses = [];
+
+    NavbarView.prototype.initialize = function() {
+      var _this = this;
+      setInterval(this.cycleStatuses, 3000);
+      Backbone.Mediator.sub('progress:show', this.show_progress, this);
+      Backbone.Mediator.sub('progress:hide', this.hide_progress, this);
+      Backbone.Mediator.sub('progress:set', this.set_progress, this);
+      Backbone.Mediator.sub('status:set', this.set_status, this);
+      this.loadingCount = 0;
+      this.$el.bind('ajaxStart', function() {
+        _this.loadingCount += 1;
+        if (_this.loadingCount === 1) {
+          _this.show_progress();
+          return app.logger.log("Syncing started.");
+        }
+      });
+      return this.$el.bind('ajaxStop', function() {
+        _this.loadingCount -= 1;
+        if (_this.loadingCount === 0) {
+          _this.hide_progress();
+          return app.logger.log("Syncing ended.");
+        }
+      });
+    };
+
+    NavbarView.prototype.cycleStatuses = function() {
+      var _this = this;
+      if (this.statuses.length === 0) {
+        return this.$('.switch-status').fadeOut('fast');
+      } else {
+        return this.$('.switch-status').fadeOut('fast', function() {
+          return _this.$('.switch-status').html(_this.statuses.pop().status).fadeIn('fast');
+        });
+      }
+    };
 
     NavbarView.prototype.helpers = {
       divider: function() {
@@ -711,21 +824,13 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       }
     };
 
-    NavbarView.prototype.initialize = function() {
-      var _this = this;
-      Backbone.Mediator.sub('progress:show', this.show_progress, this);
-      Backbone.Mediator.sub('progress:hide', this.hide_progress, this);
-      Backbone.Mediator.sub('progress:set', this.set_progress, this);
-      this.loadingCount = 0;
-      this.$el.bind('ajaxStart', function() {
-        _this.loadingCount += 1;
-        return _this.show_progress();
-      });
-      return this.$el.bind('ajaxStop', function() {
-        _this.loadingCount -= 1;
-        if (_this.loadingCount === 0) {
-          return _this.hide_progress();
-        }
+    NavbarView.prototype.set_status = function(status, sticky) {
+      if (sticky == null) {
+        sticky = false;
+      }
+      return this.statuses.push({
+        status: status,
+        sticky: sticky
       });
     };
 
@@ -1065,7 +1170,7 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', 'save'))));
       
-        __out.push('\n      </ul>\n    </div>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n  </div>\n</div>');
+        __out.push('\n      </ul>\n    </div>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n\n    <div class="pull-right">\n      <p class="switch-status" style="display: none;"></p>\n    </div>\n  </div>\n</div>');
       
       }).call(this);
       

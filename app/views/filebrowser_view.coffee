@@ -18,7 +18,7 @@ module.exports = class FilebrowserView extends Backbone.View
     @model.on 'change', @render, this
 
   render: ->
-    console.log "FilebrowserView#render"
+    app.logger.log "FilebrowserView#render"
     @$el.html @template
 
     @model.rootFolder.each (file) =>

@@ -2,6 +2,38 @@ module.exports = class NavbarView extends Backbone.View
   className: "navbar navbar-fixed-top"
   template: require './templates/navbar'
 
+  statuses: []
+
+  initialize: ->
+    setInterval @cycleStatuses, 3000
+    
+    Backbone.Mediator.sub 'progress:show', @show_progress, this
+    Backbone.Mediator.sub 'progress:hide', @hide_progress, this
+    Backbone.Mediator.sub 'progress:set', @set_progress, this
+    Backbone.Mediator.sub 'status:set', @set_status, this
+
+    @loadingCount = 0; # As to know how many requests are running.
+    @$el.bind 'ajaxStart', =>
+      @loadingCount += 1
+
+      if @loadingCount is 1
+        @show_progress()
+        app.logger.log "Syncing started."
+
+    @$el.bind 'ajaxStop', =>
+      @loadingCount -= 1
+
+      if @loadingCount is 0
+        @hide_progress()
+        app.logger.log "Syncing ended."
+
+  cycleStatuses: =>
+    if @statuses.length is 0
+      @$('.switch-status').fadeOut('fast')
+    else
+      @$('.switch-status').fadeOut 'fast', =>
+        @$('.switch-status').html(@statuses.pop().status).fadeIn('fast')
+
   helpers:
     divider: -> """
       <li class="divider"></li>
@@ -16,20 +48,7 @@ module.exports = class NavbarView extends Backbone.View
       </li>
     """
 
-  initialize: ->
-    Backbone.Mediator.sub 'progress:show', @show_progress, this
-    Backbone.Mediator.sub 'progress:hide', @hide_progress, this
-    Backbone.Mediator.sub 'progress:set', @set_progress, this
-
-    @loadingCount = 0; # As to know how many requests are running.
-    @$el.bind 'ajaxStart', =>
-      @loadingCount += 1
-      @show_progress()
-
-    @$el.bind 'ajaxStop', =>
-      @loadingCount -= 1
-
-      @hide_progress() if @loadingCount is 0
+  set_status: (status, sticky = no) -> @statuses.push {status: status, sticky: sticky}
 
   show_progress: -> @$('.progress').fadeIn('fast')
 

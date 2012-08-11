@@ -1168,6 +1168,10 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
   margin: 15px 0 0 0;
   width: 200px;
   height: 10px; }
+
+.switch-status {
+  margin-top: 11px;
+  margin-right: 10px; }
 /*.ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
 .hidden { display: none !important; visibility: hidden; }
