@@ -5,8 +5,6 @@ module.exports = class NavbarView extends Backbone.View
   statuses: []
 
   initialize: ->
-    setInterval @cycleStatuses, 3000
-    
     Backbone.Mediator.sub 'progress:show', @show_progress, this
     Backbone.Mediator.sub 'progress:hide', @hide_progress, this
     Backbone.Mediator.sub 'progress:set', @set_progress, this
@@ -27,12 +25,21 @@ module.exports = class NavbarView extends Backbone.View
         @hide_progress()
         app.logger.log "Syncing ended."
 
+  showingStatus: no
   cycleStatuses: =>
     if @statuses.length is 0
       @$('.switch-status').fadeOut('fast')
+      
+      @showingStatus = no
     else
       @$('.switch-status').fadeOut 'fast', =>
         @$('.switch-status').html(@statuses.pop().status).fadeIn('fast')
+
+        @showingStatus = yes
+
+        # Set a timer to show the next item in the list or 
+        # hide the current one
+        @statusTimeout = setTimeout @cycleStatuses, 3000
 
   helpers:
     divider: -> """
@@ -48,11 +55,28 @@ module.exports = class NavbarView extends Backbone.View
       </li>
     """
 
-  set_status: (status, sticky = no) -> @statuses.push {status: status, sticky: sticky}
+  set_status: (status, sticky = no) -> 
+    @statuses.push {status: status, sticky: sticky}
 
-  show_progress: -> @$('.progress').fadeIn('fast')
+    # If we're showing a status, then don't force-change the
+    # one being displayed.
+    @cycleStatuses() unless @showingStatus
 
-  hide_progress: -> @$('.progress').fadeOut('fast')
+  show_progress: -> 
+    @$('.progress').css
+      opacity: 0
+      display: "inline"
+
+    @$('.progress').animate
+      opacity: 1
+      width: 200
+
+  hide_progress: -> 
+    setTimeout =>
+      @$('.progress').animate
+        opacity: 0
+        width: 0
+    , 800
 
   set_progress: (progress) -> @$('.progress .bar').css('width', progress)
 

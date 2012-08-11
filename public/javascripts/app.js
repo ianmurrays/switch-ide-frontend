@@ -779,7 +779,6 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
 
     NavbarView.prototype.initialize = function() {
       var _this = this;
-      setInterval(this.cycleStatuses, 3000);
       Backbone.Mediator.sub('progress:show', this.show_progress, this);
       Backbone.Mediator.sub('progress:hide', this.hide_progress, this);
       Backbone.Mediator.sub('progress:set', this.set_progress, this);
@@ -801,13 +800,18 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       });
     };
 
+    NavbarView.prototype.showingStatus = false;
+
     NavbarView.prototype.cycleStatuses = function() {
       var _this = this;
       if (this.statuses.length === 0) {
-        return this.$('.switch-status').fadeOut('fast');
+        this.$('.switch-status').fadeOut('fast');
+        return this.showingStatus = false;
       } else {
         return this.$('.switch-status').fadeOut('fast', function() {
-          return _this.$('.switch-status').html(_this.statuses.pop().status).fadeIn('fast');
+          _this.$('.switch-status').html(_this.statuses.pop().status).fadeIn('fast');
+          _this.showingStatus = true;
+          return _this.statusTimeout = setTimeout(_this.cycleStatuses, 3000);
         });
       }
     };
@@ -828,18 +832,34 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       if (sticky == null) {
         sticky = false;
       }
-      return this.statuses.push({
+      this.statuses.push({
         status: status,
         sticky: sticky
       });
+      if (!this.showingStatus) {
+        return this.cycleStatuses();
+      }
     };
 
     NavbarView.prototype.show_progress = function() {
-      return this.$('.progress').fadeIn('fast');
+      this.$('.progress').css({
+        opacity: 0,
+        display: "inline"
+      });
+      return this.$('.progress').animate({
+        opacity: 1,
+        width: 200
+      });
     };
 
     NavbarView.prototype.hide_progress = function() {
-      return this.$('.progress').fadeOut('fast');
+      var _this = this;
+      return setTimeout(function() {
+        return _this.$('.progress').animate({
+          opacity: 0,
+          width: 0
+        });
+      }, 800);
     };
 
     NavbarView.prototype.set_progress = function(progress) {
