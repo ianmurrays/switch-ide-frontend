@@ -9,11 +9,32 @@
           <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <li><a href="#"> <i class="icon-plus"></i> New Project </a></li>
-          <li><a href="#"> <i class="icon-blank"></i> New File </a></li>
+          <%= @safe @helper.menuItem 'New Project', '#', 'plus' %>
+          <%= @safe @helper.menuItem 'New File', '#' %>
+          <%= @safe @helper.menuItem 'Add Files', '#', 'upload' %>
+          <%= @safe @helper.menuItem 'Save', '#', 'save' %>
+          <%= @safe @helper.menuItem 'Quick Open File', '#', 'fire' %>
+          <%= @safe @helper.divider() %>
+          <%= @safe @helper.menuItem 'Close Project', '#', 'remove' %>
         </ul>
       </li>
     </ul>
+
+    <div class="btn-group pull-right">
+      <a class="btn btn-success">
+        <i class="icon-legal"></i>
+        Build & Run
+      </a>
+      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <%= @safe @helper.menuItem 'Build', '#', 'legal' %>
+        <%= @safe @helper.menuItem 'Run', '#', 'play' %>
+        <%= @safe @helper.menuItem 'Test', '#', 'wrench' %>
+        <%= @safe @helper.menuItem 'Archive', '#', 'save' %>
+      </ul>
+    </div>
 
     <div class="progress progress-striped active pull-right" style="display: none;">
       <div class="bar" style="width: 100%;"></div>

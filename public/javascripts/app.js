@@ -699,6 +699,18 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
 
     NavbarView.prototype.template = require('./templates/navbar');
 
+    NavbarView.prototype.helpers = {
+      divider: function() {
+        return "<li class=\"divider\"></li>";
+      },
+      menuItem: function(title, url, icon) {
+        if (icon == null) {
+          icon = "blank";
+        }
+        return "<li>\n  <a href=\"" + url + "\">\n    <i class=\"icon-" + icon + "\"></i>\n    " + title + "\n  </a>\n</li>";
+      }
+    };
+
     NavbarView.prototype.initialize = function() {
       var _this = this;
       Backbone.Mediator.sub('progress:show', this.show_progress, this);
@@ -730,7 +742,9 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
     };
 
     NavbarView.prototype.render = function() {
-      this.$el.html(this.template);
+      this.$el.html(this.template({
+        helper: this.helpers
+      }));
       return this;
     };
 
@@ -1007,7 +1021,51 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
     (function() {
       (function() {
       
-        __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          <li><a href="#"> <i class="icon-plus"></i> New Project </a></li>\n          <li><a href="#"> <i class="icon-blank"></i> New File </a></li>\n        </ul>\n      </li>\n    </ul>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n  </div>\n</div>');
+        __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', '#', 'plus'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('New File', '#'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Add Files', '#', 'upload'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Save', '#', 'save'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Quick Open File', '#', 'fire'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.divider())));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Close Project', '#', 'remove'))));
+      
+        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', 'legal'))));
+      
+        __out.push('\n        ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', '#', 'play'))));
+      
+        __out.push('\n        ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', '#', 'wrench'))));
+      
+        __out.push('\n        ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', 'save'))));
+      
+        __out.push('\n      </ul>\n    </div>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n  </div>\n</div>');
       
       }).call(this);
       
