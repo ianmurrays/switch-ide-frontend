@@ -9,6 +9,8 @@
   overflow-y: auto;
   box-shadow: 0 0 15px #666;
 
+  div.separator { height: 20px; }
+
   .file-container {
     .subdirectory { padding-left: 15px; }
 

@@ -8,6 +8,7 @@ module.exports = class Project extends Model
   initialize: ->
     @rootFolder = new Files
 
+  fetchRootFolder: ->
     if @get('id')
       @rootFolder = new Files null, path: "/", project: this
       @rootFolder.fetch()

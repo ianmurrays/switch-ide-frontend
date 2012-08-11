@@ -262,6 +262,8 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
   background: whiteSmoke;
   overflow-y: auto;
   box-shadow: 0 0 15px #666; }
+  #filebrowser div.separator {
+    height: 20px; }
   #filebrowser .file-container .subdirectory {
     padding-left: 15px; }
   #filebrowser .file-container .file-item {

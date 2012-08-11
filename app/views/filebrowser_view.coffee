@@ -14,6 +14,7 @@ module.exports = class FilebrowserView extends Backbone.View
 
   setModel: (model) ->
     @model = model
+    @model.fetchRootFolder() # This loads the files on the root of the project
     @model.on 'change', @render, this
 
   render: ->

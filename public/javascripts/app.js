@@ -102,8 +102,12 @@ window.require.define({"application": function(exports, require, module) {
     }
 
     Application.prototype.initialize = function() {
+      var _this = this;
       this.router = new Router;
-      return this.renderEssentialComponents();
+      this.renderEssentialComponents();
+      return $(window).resize(function() {
+        return _this.resizeComponents();
+      });
     };
 
     Application.prototype.renderEssentialComponents = function() {
@@ -118,14 +122,13 @@ window.require.define({"application": function(exports, require, module) {
     };
 
     Application.prototype.resizeComponents = function() {
-      var code_editor_width, filebrowser_height, filebrowser_width;
-      filebrowser_height = $('#filebrowser').height();
+      var code_editor_width, filebrowser_width;
       filebrowser_width = $('#filebrowser').width();
-      $('#filebrowser').height(filebrowser_height - 40);
+      $('#filebrowser').height($(window).height() - 40);
       $('#filebrowser').css('top', 40);
       code_editor_width = $('.code-editor').width();
       $('.code-editor, .CodeMirror-scroll').height($(window).height() - 40);
-      $('.code-editor').width(code_editor_width - filebrowser_width);
+      $('.code-editor').width($(window).width() - filebrowser_width - 5);
       return $('.code-editor').css('top', 40);
     };
 
@@ -341,7 +344,10 @@ window.require.define({"models/project": function(exports, require, module) {
     };
 
     Project.prototype.initialize = function() {
-      this.rootFolder = new Files;
+      return this.rootFolder = new Files;
+    };
+
+    Project.prototype.fetchRootFolder = function() {
       if (this.get('id')) {
         this.rootFolder = new Files(null, {
           path: "/",
@@ -631,6 +637,7 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
 
     FilebrowserView.prototype.setModel = function(model) {
       this.model = model;
+      this.model.fetchRootFolder();
       return this.model.on('change', this.render, this);
     };
 
@@ -949,7 +956,7 @@ window.require.define({"views/templates/filebrowser": function(exports, require,
     (function() {
       (function() {
       
-        __out.push('<ul class="nav nav-list">\n  <li class="nav-header"> Open Files </li>\n</ul>\n<div class="nav nav-list" id="open_files"></div>\n\n<ul class="nav nav-list">\n  <li class="nav-header">Project</li>\n</ul>\n<div class="nav nav-list" id="project_files"></div>\n');
+        __out.push('<ul class="nav nav-list">\n  <li class="nav-header"> Open Files </li>\n</ul>\n<div class="nav nav-list" id="open_files"></div>\n\n<ul class="nav nav-list">\n  <li class="nav-header">Project</li>\n</ul>\n<div class="nav nav-list" id="project_files"></div>\n\n<div class="separator"><!-- separator, keeps the status bar at "bar" ;P --></div>');
       
       }).call(this);
       

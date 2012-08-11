@@ -7,3 +7,5 @@
   <li class="nav-header">Project</li>
 </ul>
 <div class="nav nav-list" id="project_files"></div>
+
+<div class="separator"><!-- separator, keeps the status bar at "bar" ;P --></div>
