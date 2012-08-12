@@ -42,6 +42,7 @@ module.exports = class File extends Model
   updateContent: (callback) ->
     return if @isDirectory()
 
+    Backbone.Mediator.pub "status:set", "Saving #{@get('name')} ..."
     $.ajax
       url: @railsPath('save_content'), 
       type: 'PUT',

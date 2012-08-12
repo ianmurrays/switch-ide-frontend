@@ -274,6 +274,7 @@ window.require.define({"models/file": function(exports, require, module) {
       if (this.isDirectory()) {
         return;
       }
+      Backbone.Mediator.pub("status:set", "Saving " + (this.get('name')) + " ...");
       return $.ajax({
         url: this.railsPath('save_content'),
         type: 'PUT',
@@ -420,6 +421,7 @@ window.require.define({"models/project": function(exports, require, module) {
     };
 
     Project.prototype.runProject = function(callback) {
+      Backbone.Mediator.pub("status:set", "Starting server...");
       return $.ajax({
         url: this.railsPath("run"),
         type: "POST",
@@ -431,7 +433,7 @@ window.require.define({"models/project": function(exports, require, module) {
             Backbone.Mediator.pub("status:set", "Running");
             return typeof callback === "function" ? callback() : void 0;
           } else {
-            return Backbone.Mediator.pub("status:set", "Failed to start serverx");
+            return Backbone.Mediator.pub("status:set", "Failed to start server");
           }
         }
       });

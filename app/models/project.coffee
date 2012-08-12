@@ -16,6 +16,7 @@ module.exports = class Project extends Model
   railsPath: (method) -> path = [app.baseUrl, "projects", @get('id'), method].join("/")
 
   runProject: (callback) ->
+    Backbone.Mediator.pub "status:set", "Starting server..."
     $.ajax
       url: @railsPath("run")
       type: "POST"
@@ -29,13 +30,12 @@ module.exports = class Project extends Model
           
           callback?()
         else
-          Backbone.Mediator.pub "status:set", "Failed to start serverx"
+          Backbone.Mediator.pub "status:set", "Failed to start server"
 
   buildAndRun: ->
     @buildProject =>
       app.logger.log "Now calling attempting to run"
       @runProject()
-
 
   buildProject: (callback) ->
     Backbone.Mediator.pub "status:set", "Building..."
