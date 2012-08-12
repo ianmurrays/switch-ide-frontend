@@ -965,7 +965,7 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
     };
 
     NavbarView.prototype.showStatus = function(status, options) {
-      var _this = this;
+      var _ref;
       if (options == null) {
         options = {};
       }
@@ -976,13 +976,28 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       if (!options.sticky) {
         this.statusTimeout = setTimeout(this.hideStatus, 3000);
       }
-      return this.$('.switch-status').fadeOut('fast', function() {
-        return _this.$('.switch-status').html(status).fadeIn('fast');
+      return this.$('.switch-status').animate({
+        top: 20,
+        opacity: 0
+      }, (_ref = this.$('.switch-status').is('hidden')) != null ? _ref : {
+        0: 500
+      }, function() {
+        return $(this).html(status).css({
+          display: 'inline',
+          top: -20,
+          opacity: 0
+        }).animate({
+          top: 11,
+          opacity: 1
+        });
       });
     };
 
     NavbarView.prototype.hideStatus = function() {
-      return this.$('.switch-status').fadeOut('fast');
+      return this.$('.switch-status').animate({
+        top: '20px',
+        opacity: 0
+      });
     };
 
     NavbarView.prototype.showProgress = function() {
@@ -1479,7 +1494,7 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
           icon: 'save'
         }))));
       
-        __out.push('\n      </ul>\n    </div>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n\n    <div class="pull-right">\n      <p class="switch-status" style="display: none;"></p>\n    </div>\n  </div>\n</div>');
+        __out.push('\n      </ul>\n    </div>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n\n    <div class="pull-right">\n      <p class="switch-status" style="position: relative">Ready</p>\n    </div>\n  </div>\n</div>');
       
       }).call(this);
       

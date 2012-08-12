@@ -94,7 +94,7 @@
     </div>
 
     <div class="pull-right">
-      <p class="switch-status" style="display: none;"></p>
+      <p class="switch-status" style="position: relative">Ready</p>
     </div>
   </div>
 </div>

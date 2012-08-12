@@ -73,10 +73,27 @@ module.exports = class NavbarView extends Backbone.View
     # Set a timer to hide after some seconds
     @statusTimeout = setTimeout @hideStatus, 3000 unless options.sticky
 
-    @$('.switch-status').fadeOut 'fast', =>
-      @$('.switch-status').html(status).fadeIn('fast')
+    # @$('.switch-status').fadeOut 'fast', =>
+    #   @$('.switch-status').html(status).fadeIn('fast')
+    @$('.switch-status').animate
+                          top: 20
+                          opacity: 0
+                        , (@$('.switch-status').is('hidden') ? 0 : 500), ->
+                          $(this).html(status)
+                          .css
+                            display: 'inline'
+                            # position: 'absolute'
+                            top: -20
+                            opacity: 0
+                          .animate
+                            top: 11
+                            opacity: 1
 
-  hideStatus: => @$('.switch-status').fadeOut 'fast'
+  hideStatus: => 
+    # @$('.switch-status').fadeOut 'fast'
+    @$('.switch-status').animate
+                          top: '20px'
+                          opacity: 0
 
   showProgress: -> 
 
