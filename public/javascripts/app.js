@@ -977,25 +977,36 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       return this.$('.switch-status').fadeOut('fast');
     };
 
+    NavbarView.showProgressTimeout = null;
+
     NavbarView.prototype.showProgress = function() {
-      this.$('.progress').css({
-        opacity: 0,
-        display: "inline"
-      });
-      return this.$('.progress').animate({
-        opacity: 1,
-        width: 200
-      });
+      var _this = this;
+      return this.showProgressTimeout = setTimeout(function() {
+        _this.$('.progress').css({
+          opacity: 0,
+          display: "inline"
+        });
+        _this.$('.progress').animate({
+          opacity: 1,
+          width: 150
+        });
+        return _this.showProgressTimeout = null;
+      }, 500);
     };
 
     NavbarView.prototype.hideProgress = function() {
       var _this = this;
-      return setTimeout(function() {
-        return _this.$('.progress').animate({
-          opacity: 0,
-          width: 0
-        });
-      }, 800);
+      if (this.showProgressTimeout != null) {
+        clearTimeout(this.showProgressTimeout);
+        return this.showProgressTimeout = null;
+      } else {
+        return setTimeout(function() {
+          return _this.$('.progress').animate({
+            opacity: 0,
+            width: 0
+          });
+        }, 800);
+      }
     };
 
     NavbarView.prototype.setProgress = function(progress) {

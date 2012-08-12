@@ -1168,7 +1168,7 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
     background-color: #0088cc; }
 .progress {
   margin: 15px 0 0 0;
-  width: 200px;
+  width: 150px;
   height: 10px; }
 
 .switch-status {

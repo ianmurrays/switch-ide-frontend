@@ -77,21 +77,32 @@ module.exports = class NavbarView extends Backbone.View
 
   hideStatus: => @$('.switch-status').fadeOut 'fast'
 
+  @showProgressTimeout: null
   showProgress: -> 
-    @$('.progress').css
-      opacity: 0
-      display: "inline"
 
-    @$('.progress').animate
-      opacity: 1
-      width: 200
+    @showProgressTimeout = setTimeout =>
+      @$('.progress').css
+        opacity: 0
+        display: "inline"
+
+      @$('.progress').animate
+        opacity: 1
+        width: 150
+
+      @showProgressTimeout = null
+    , 500
 
   hideProgress: -> 
-    setTimeout =>
-      @$('.progress').animate
-        opacity: 0
-        width: 0
-    , 800
+    if @showProgressTimeout?
+      # Hasn't appeared yet
+      clearTimeout(@showProgressTimeout)
+      @showProgressTimeout = null
+    else
+      setTimeout =>
+        @$('.progress').animate
+          opacity: 0
+          width: 0
+      , 800
 
   setProgress: (progress) -> @$('.progress .bar').css('width', progress)
 
