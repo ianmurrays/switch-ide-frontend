@@ -10,30 +10,30 @@
           <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <%= @safe @helper.menuItem 'New Project', '#', icon: 'plus', shortcut: '⌘⇧N' %>
-          <%= @safe @helper.menuItem 'New File', '#', shortcut: '⌘N' %>
-          <%= @safe @helper.menuItem 'Add Files', '#', icon: 'upload' %>
-          <%= @safe @helper.menuItem 'Save', '#', icon: 'save', shortcut: '⌘S' %>
-          <%= @safe @helper.menuItem 'Quick Open', '#', icon: 'fire', shortcut: '⌘T' %>
+          <%= @safe @helper.menuItem 'New Project', 'javascript:;', icon: 'plus', shortcut: '⌘⇧N' %>
+          <%= @safe @helper.menuItem 'New File', 'javascript:;', shortcut: '⌘N' %>
+          <%= @safe @helper.menuItem 'Add Files', 'javascript:;', icon: 'upload' %>
+          <%= @safe @helper.menuItem 'Save', 'javascript:;', icon: 'save', shortcut: '⌘S' %>
+          <%= @safe @helper.menuItem 'Quick Open', 'javascript:;', icon: 'fire', shortcut: '⌘T' %>
           <%= @safe @helper.divider() %>
-          <%= @safe @helper.menuItem 'Close Project', '#', icon: 'remove' %>
+          <%= @safe @helper.menuItem 'Close Project', 'javascript:;', icon: 'remove' %>
         </ul>
       </li>
     </ul>
 
     <ul class="nav">
       <li class="dropdown">
-        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
           <i class="icon-briefcase"></i>
           Project
           <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <%= @safe @helper.menuItem 'Build & Run', '#', icon: 'legal', shortcut: '⌘R' %>
-          <%= @safe @helper.menuItem 'Build', '#', shortcut: '⌘B' %>
-          <%= @safe @helper.menuItem 'Run', '#', icon: 'play' %>
-          <%= @safe @helper.menuItem 'Test', '#', icon: 'wrench', shortcut: '⌘⇧T' %>
-          <%= @safe @helper.menuItem 'Archive', '#', icon: 'save' %>
+          <%= @safe @helper.menuItem 'Build & Run', 'javascript:;', icon: 'legal', shortcut: '⌘R', menu_id: 'build-run' %>
+          <%= @safe @helper.menuItem 'Build', 'javascript:;', shortcut: '⌘B', menu_id: 'build' %>
+          <%= @safe @helper.menuItem 'Run', 'javascript:;', icon: 'play', menu_id: 'run' %>
+          <%= @safe @helper.menuItem 'Test', 'javascript:;', icon: 'wrench', shortcut: '⌘⇧T' %>
+          <%= @safe @helper.menuItem 'Archive', 'javascript:;', icon: 'save' %>
           <!-- <%= @safe @helper.divider() %> -->
         </ul>
       </li>
@@ -47,14 +47,14 @@
           <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <%= @safe @helper.menuItem 'Create Repo', '#' %>
-          <%= @safe @helper.menuItem 'Commit', '#', icon: 'ok', shortcut: '⌘⌥C' %>
-          <%= @safe @helper.menuItem 'Push', '#', icon: 'upload-alt', shortcut: '⌘⌥P' %>
-          <%= @safe @helper.menuItem 'Pull', '#', icon: 'download-alt', shortcut: '⌘⌥X' %>
+          <%= @safe @helper.menuItem 'Create Repo', 'javascript:;' %>
+          <%= @safe @helper.menuItem 'Commit', 'javascript:;', icon: 'ok', shortcut: '⌘⌥C' %>
+          <%= @safe @helper.menuItem 'Push', 'javascript:;', icon: 'upload-alt', shortcut: '⌘⌥P' %>
+          <%= @safe @helper.menuItem 'Pull', 'javascript:;', icon: 'download-alt', shortcut: '⌘⌥X' %>
           <%= @safe @helper.divider() %>
-          <%= @safe @helper.menuItem 'Switch Branch', '#', icon: 'random' %>
-          <%= @safe @helper.menuItem 'Merge', '#' %>
-          <%= @safe @helper.menuItem 'Tag', '#', icon: 'tag' %>
+          <%= @safe @helper.menuItem 'Switch Branch', 'javascript:;', icon: 'random' %>
+          <%= @safe @helper.menuItem 'Merge', 'javascript:;' %>
+          <%= @safe @helper.menuItem 'Tag', 'javascript:;', icon: 'tag' %>
         </ul>
       </li>
     </ul>
@@ -67,14 +67,14 @@
           <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <%= @safe @helper.menuItem 'Close', '#', shortcut: '⌃W' %>
-          <!-- <%= @safe @helper.menuItem 'Cycle Files', '#', icon: 'refresh', shortcut: '⌘1..9' %> -->
+          <%= @safe @helper.menuItem 'Close', 'javascript:;', shortcut: '⌃W' %>
+          <!-- <%= @safe @helper.menuItem 'Cycle Files', 'javascript:;', icon: 'refresh', shortcut: '⌘1..9' %> -->
         </ul>
       </li>
     </ul>
 
     <div class="btn-group pull-right">
-      <a class="btn btn-success">
+      <a class="btn btn-success" data-menu_id="build-run">
         <i class="icon-legal"></i>
         Build & Run
       </a>
@@ -82,10 +82,10 @@
         <span class="caret"></span>
       </a>
       <ul class="dropdown-menu">
-        <%= @safe @helper.menuItem 'Build', '#', shortcut: '⌘B' %>
-        <%= @safe @helper.menuItem 'Run', '#', icon: 'play' %>
-        <%= @safe @helper.menuItem 'Test', '#', icon: 'wrench', shortcut: '⌘⇧T' %>
-        <%= @safe @helper.menuItem 'Archive', '#', icon: 'save' %>
+        <%= @safe @helper.menuItem 'Build', 'javascript:;', shortcut: '⌘B', menu_id: 'build' %>
+        <%= @safe @helper.menuItem 'Run', 'javascript:;', icon: 'play', menu_id: 'run' %>
+        <%= @safe @helper.menuItem 'Test', 'javascript:;', icon: 'wrench', shortcut: '⌘⇧T' %>
+        <%= @safe @helper.menuItem 'Archive', 'javascript:;', icon: 'save' %>
       </ul>
     </div>
 

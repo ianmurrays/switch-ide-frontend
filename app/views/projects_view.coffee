@@ -1,5 +1,5 @@
 module.exports = class ProjectsView extends Backbone.View
-  className: 'modal hide' # Hidden modal by default
+  className: 'modal hide fade' # Hidden modal by default
   id: "projects_modal"
   template: require './templates/projects'
 

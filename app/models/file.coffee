@@ -25,7 +25,7 @@ module.exports = class File extends Model
   fullPath: -> "#{@get('parent')}/#{@get('name')}"
 
   railsPath: (method) ->
-    path = [app.baseUrl, "projects", 9, "files", method].join("/")
+    path = [app.baseUrl, "projects", @project.get('id'), "files", method].join("/")
     path += "?path=#{[@get('parent'), @get('name')].join "/"}" # Had to do this like this in order to play
                                     # nicely with rails.
 

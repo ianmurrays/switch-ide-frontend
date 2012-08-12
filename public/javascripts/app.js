@@ -252,7 +252,7 @@ window.require.define({"models/file": function(exports, require, module) {
 
     File.prototype.railsPath = function(method) {
       var path;
-      path = [app.baseUrl, "projects", 9, "files", method].join("/");
+      path = [app.baseUrl, "projects", this.project.get('id'), "files", method].join("/");
       return path += "?path=" + ([this.get('parent'), this.get('name')].join("/"));
     };
 
@@ -414,6 +414,56 @@ window.require.define({"models/project": function(exports, require, module) {
       }
     };
 
+    Project.prototype.railsPath = function(method) {
+      var path;
+      return path = [app.baseUrl, "projects", this.get('id'), method].join("/");
+    };
+
+    Project.prototype.runProject = function(callback) {
+      return $.ajax({
+        url: this.railsPath("run"),
+        type: "POST",
+        success: function(response) {
+          if (!response.result) {
+            setTimeout(function() {
+              return window.open("http://localhost:8888");
+            }, 1500);
+            Backbone.Mediator.pub("status:set", "Running");
+            return typeof callback === "function" ? callback() : void 0;
+          } else {
+            return Backbone.Mediator.pub("status:set", "Failed to start serverx");
+          }
+        }
+      });
+    };
+
+    Project.prototype.buildAndRun = function() {
+      var _this = this;
+      return this.buildProject(function() {
+        app.logger.log("Now calling attempting to run");
+        return _this.runProject();
+      });
+    };
+
+    Project.prototype.buildProject = function(callback) {
+      Backbone.Mediator.pub("status:set", "Building...");
+      return $.ajax({
+        url: this.railsPath("build"),
+        type: "POST",
+        success: function(response) {
+          var modal;
+          if (response.result) {
+            Backbone.Mediator.pub("status:set", "Build failed");
+            modal = "<div class=\"modal hide fade\" id=\"myModal\">\n  <div class=\"modal-header\">\n    <button type=\"button\" class=\"close\" data-dismiss=\"modal\">×</button>\n    <h3 class=\"build-error\">Build Failed</h3>\n  </div>\n  <div class=\"modal-body\">\n    <p>Build failed. Here's the output of the build process:</p>\n    <pre style=\"overflow: auto;\">" + response.output + "</pre>\n  </div>\n  <div class=\"modal-footer\">\n    <a href=\"javascript:;\" class=\"btn\" data-dismiss=\"modal\">Close</a>\n  </div>\n</div>";
+            return $(modal).appendTo('body').modal("show");
+          } else {
+            Backbone.Mediator.pub("status:set", "Build successful");
+            return typeof callback === "function" ? callback() : void 0;
+          }
+        }
+      });
+    };
+
     return Project;
 
   })(Model);
@@ -488,13 +538,12 @@ window.require.define({"routers/router": function(exports, require, module) {
     };
 
     Router.prototype.project = function(id) {
-      var project;
       app.logger.log("Router#project");
-      project = new Project({
+      app.project = new Project({
         id: id
       });
-      app.filebrowser.setModel(project);
-      project.fetch({
+      app.filebrowser.setModel(app.project);
+      app.project.fetch({
         success: function() {
           return Backbone.Mediator.pub('status:set', "Project Loaded");
         }
@@ -828,7 +877,9 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
     __extends(NavbarView, _super);
 
     function NavbarView() {
-      this.cycleStatuses = __bind(this.cycleStatuses, this);
+      this.hideStatus = __bind(this.hideStatus, this);
+
+      this.showStatus = __bind(this.showStatus, this);
       return NavbarView.__super__.constructor.apply(this, arguments);
     }
 
@@ -838,43 +889,50 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
 
     NavbarView.prototype.statuses = [];
 
+    NavbarView.prototype.showingStatus = false;
+
+    NavbarView.prototype.events = {
+      "click [data-menu_id=build]": "buildProject",
+      "click [data-menu_id=build-run]": "buildAndRun",
+      "click [data-menu_id=run]": "runProject"
+    };
+
     NavbarView.prototype.initialize = function() {
       var _this = this;
-      Backbone.Mediator.sub('progress:show', this.show_progress, this);
-      Backbone.Mediator.sub('progress:hide', this.hide_progress, this);
-      Backbone.Mediator.sub('progress:set', this.set_progress, this);
-      Backbone.Mediator.sub('status:set', this.set_status, this);
+      Backbone.Mediator.sub('progress:show', this.showProgress, this);
+      Backbone.Mediator.sub('progress:hide', this.hideProgress, this);
+      Backbone.Mediator.sub('progress:set', this.setProgress, this);
+      Backbone.Mediator.sub('status:set', this.showStatus, this);
+      this.bindKeys();
       this.loadingCount = 0;
       this.$el.bind('ajaxStart', function() {
         _this.loadingCount += 1;
         if (_this.loadingCount === 1) {
-          _this.show_progress();
+          _this.showProgress();
           return app.logger.log("Syncing started.");
         }
       });
       return this.$el.bind('ajaxStop', function() {
         _this.loadingCount -= 1;
         if (_this.loadingCount === 0) {
-          _this.hide_progress();
+          _this.hideProgress();
           return app.logger.log("Syncing ended.");
         }
       });
     };
 
-    NavbarView.prototype.showingStatus = false;
-
-    NavbarView.prototype.cycleStatuses = function() {
+    NavbarView.prototype.bindKeys = function() {
       var _this = this;
-      if (this.statuses.length === 0) {
-        this.$('.switch-status').fadeOut('fast');
-        return this.showingStatus = false;
-      } else {
-        return this.$('.switch-status').fadeOut('fast', function() {
-          _this.$('.switch-status').html(_this.statuses.pop().status).fadeIn('fast');
-          _this.showingStatus = true;
-          return _this.statusTimeout = setTimeout(_this.cycleStatuses, 3000);
+      Mousetrap.bind(["ctrl+r", "command+r"], function(e) {
+        e.preventDefault();
+        return app.code_editor.updateAndSave(function() {
+          return _this.buildAndRun();
         });
-      }
+      });
+      return Mousetrap.bind(["ctrl+b", "command+b"], function(e) {
+        e.preventDefault();
+        return _this.buildProject();
+      });
     };
 
     NavbarView.prototype.helpers = {
@@ -887,28 +945,27 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
         }
         options = _.defaults(options, {
           icon: "blank",
-          shortcut: ""
+          shortcut: "",
+          menu_id: ""
         });
-        return "<li>\n  <a href=\"" + url + "\">\n    <i class=\"icon-" + options.icon + "\"></i>\n    " + title + "\n    <div class=\"pull-right keyboard-shortcut\">" + options.shortcut + "</div>\n  </a>\n</li>";
+        return "<li>\n  <a href=\"" + url + "\" data-menu_id=\"" + options.menu_id + "\">\n    <i class=\"icon-" + options.icon + "\"></i>\n    " + title + "\n    <div class=\"pull-right keyboard-shortcut\">" + options.shortcut + "</div>\n  </a>\n</li>";
       }
     };
 
-    NavbarView.prototype.set_status = function(status, sticky) {
-      if (sticky == null) {
-        sticky = false;
-      }
-      if (!_.include(this.statuses, status)) {
-        this.statuses.push({
-          status: status,
-          sticky: sticky
-        });
-      }
-      if (!this.showingStatus) {
-        return this.cycleStatuses();
-      }
+    NavbarView.prototype.showStatus = function(status) {
+      var _this = this;
+      clearTimeout(this.statusTimeout);
+      return this.$('.switch-status').fadeOut('fast', function() {
+        _this.$('.switch-status').html(status).fadeIn('fast');
+        return _this.statusTimeout = setTimeout(_this.hideStatus, 3000);
+      });
     };
 
-    NavbarView.prototype.show_progress = function() {
+    NavbarView.prototype.hideStatus = function() {
+      return this.$('.switch-status').fadeOut('fast');
+    };
+
+    NavbarView.prototype.showProgress = function() {
       this.$('.progress').css({
         opacity: 0,
         display: "inline"
@@ -919,7 +976,7 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       });
     };
 
-    NavbarView.prototype.hide_progress = function() {
+    NavbarView.prototype.hideProgress = function() {
       var _this = this;
       return setTimeout(function() {
         return _this.$('.progress').animate({
@@ -929,7 +986,7 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       }, 800);
     };
 
-    NavbarView.prototype.set_progress = function(progress) {
+    NavbarView.prototype.setProgress = function(progress) {
       return this.$('.progress .bar').css('width', progress);
     };
 
@@ -938,6 +995,18 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
         helper: this.helpers
       }));
       return this;
+    };
+
+    NavbarView.prototype.buildProject = function() {
+      return app.project.buildProject();
+    };
+
+    NavbarView.prototype.runProject = function() {
+      return app.project.runProject();
+    };
+
+    NavbarView.prototype.buildAndRun = function() {
+      return app.project.buildAndRun();
     };
 
     return NavbarView;
@@ -959,7 +1028,7 @@ window.require.define({"views/projects_view": function(exports, require, module)
       return ProjectsView.__super__.constructor.apply(this, arguments);
     }
 
-    ProjectsView.prototype.className = 'modal hide';
+    ProjectsView.prototype.className = 'modal hide fade';
 
     ProjectsView.prototype.id = "projects_modal";
 
@@ -1215,33 +1284,33 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-file"></i>\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', 'javascript:;', {
           icon: 'plus',
           shortcut: '⌘⇧N'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('New File', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('New File', 'javascript:;', {
           shortcut: '⌘N'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Add Files', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Add Files', 'javascript:;', {
           icon: 'upload'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Save', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Save', 'javascript:;', {
           icon: 'save',
           shortcut: '⌘S'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Quick Open', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Quick Open', 'javascript:;', {
           icon: 'fire',
           shortcut: '⌘T'
         }))));
@@ -1252,39 +1321,42 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Close Project', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Close Project', 'javascript:;', {
           icon: 'remove'
         }))));
       
-        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-briefcase"></i>\n          Project\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-briefcase"></i>\n          Project\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Build & Run', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build & Run', 'javascript:;', {
           icon: 'legal',
-          shortcut: '⌘R'
+          shortcut: '⌘R',
+          menu_id: 'build-run'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', {
-          shortcut: '⌘B'
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', 'javascript:;', {
+          shortcut: '⌘B',
+          menu_id: 'build'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', '#', {
-          icon: 'play'
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', 'javascript:;', {
+          icon: 'play',
+          menu_id: 'run'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', 'javascript:;', {
           icon: 'wrench',
           shortcut: '⌘⇧T'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', 'javascript:;', {
           icon: 'save'
         }))));
       
@@ -1294,25 +1366,25 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-github"></i>\n          Git\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Create Repo', '#'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Create Repo', 'javascript:;'))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Commit', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Commit', 'javascript:;', {
           icon: 'ok',
           shortcut: '⌘⌥C'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Push', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Push', 'javascript:;', {
           icon: 'upload-alt',
           shortcut: '⌘⌥P'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Pull', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Pull', 'javascript:;', {
           icon: 'download-alt',
           shortcut: '⌘⌥X'
         }))));
@@ -1323,55 +1395,57 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Switch Branch', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Switch Branch', 'javascript:;', {
           icon: 'random'
         }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Merge', '#'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Merge', 'javascript:;'))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Tag', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Tag', 'javascript:;', {
           icon: 'tag'
         }))));
       
         __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-th-large"></i>\n          Window\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Close', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Close', 'javascript:;', {
           shortcut: '⌃W'
         }))));
       
         __out.push('\n          <!-- ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Cycle Files', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Cycle Files', 'javascript:;', {
           icon: 'refresh',
           shortcut: '⌘1..9'
         }))));
       
-        __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
+        __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success" data-menu_id="build-run">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', {
-          shortcut: '⌘B'
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', 'javascript:;', {
+          shortcut: '⌘B',
+          menu_id: 'build'
         }))));
       
         __out.push('\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', '#', {
-          icon: 'play'
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', 'javascript:;', {
+          icon: 'play',
+          menu_id: 'run'
         }))));
       
         __out.push('\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', 'javascript:;', {
           icon: 'wrench',
           shortcut: '⌘⇧T'
         }))));
       
         __out.push('\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', {
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', 'javascript:;', {
           icon: 'save'
         }))));
       
