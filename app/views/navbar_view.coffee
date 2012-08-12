@@ -64,13 +64,16 @@ module.exports = class NavbarView extends Backbone.View
         </li>
       """
 
-  showStatus: (status) =>
+  showStatus: (status, options = {}) =>
+    options = _.defaults options, sticky: no
+
     clearTimeout(@statusTimeout)
+
+    # Set a timer to hide after some seconds
+    @statusTimeout = setTimeout @hideStatus, 3000 unless options.sticky
 
     @$('.switch-status').fadeOut 'fast', =>
       @$('.switch-status').html(status).fadeIn('fast')
-      # Set a timer to hide after some seconds
-      @statusTimeout = setTimeout @hideStatus, 3000
 
   hideStatus: => @$('.switch-status').fadeOut 'fast'
 

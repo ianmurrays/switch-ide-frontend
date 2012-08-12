@@ -430,7 +430,9 @@ window.require.define({"models/project": function(exports, require, module) {
             setTimeout(function() {
               return window.open("http://localhost:8888");
             }, 1500);
-            Backbone.Mediator.pub("status:set", "Running");
+            Backbone.Mediator.pub("status:set", "Running", {
+              sticky: true
+            });
             return typeof callback === "function" ? callback() : void 0;
           } else {
             return Backbone.Mediator.pub("status:set", "Failed to start server");
@@ -805,11 +807,11 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
     FilebrowserView.prototype.setModel = function(model) {
       var _ref;
       if ((_ref = this.model) != null) {
-        _ref.off('change', this.render);
+        _ref.off('change', this.render, this);
       }
       this.model = model;
-      this.model.fetchRootFolder();
-      return this.model.on('change', this.render, this);
+      this.model.on('change', this.render, this);
+      return this.model.fetchRootFolder();
     };
 
     FilebrowserView.prototype.render = function() {
@@ -954,12 +956,20 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       }
     };
 
-    NavbarView.prototype.showStatus = function(status) {
+    NavbarView.prototype.showStatus = function(status, options) {
       var _this = this;
+      if (options == null) {
+        options = {};
+      }
+      options = _.defaults(options, {
+        sticky: false
+      });
       clearTimeout(this.statusTimeout);
+      if (!options.sticky) {
+        this.statusTimeout = setTimeout(this.hideStatus, 3000);
+      }
       return this.$('.switch-status').fadeOut('fast', function() {
-        _this.$('.switch-status').html(status).fadeIn('fast');
-        return _this.statusTimeout = setTimeout(_this.hideStatus, 3000);
+        return _this.$('.switch-status').html(status).fadeIn('fast');
       });
     };
 
