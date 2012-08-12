@@ -11,7 +11,6 @@ module.exports = class FileView extends Backbone.View
   # we need to make links unique
   events: ->
     events = {}
-    # events["dblclick a#cid_#{@model.cid} i"] = "removeFromList"
     events["click a#cid_#{@model.cid}"] = "open"
     events
 
@@ -39,8 +38,7 @@ module.exports = class FileView extends Backbone.View
   # on the "Open Files" list
   removeFromList: ->
     return unless @allowClose
-
-    app.logger.log "removing!"
+    
     @remove()
 
     Backbone.Mediator.pub "filebrowser:close_file", @model

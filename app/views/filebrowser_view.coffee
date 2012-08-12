@@ -1,10 +1,12 @@
 Project = require 'models/project'
 FileView = require './file_view'
+File = require 'models/file'
 
 module.exports = class FilebrowserView extends Backbone.View
   className: 'filebrowser'
   template: require './templates/filebrowser'
   openFiles: {} # Holds a list of instances of open files
+  openFile: null # Which file is open right now?
   arrayOpenFiles: [] # Keeps order of files, for keyboard shortcuts
 
   initialize: ->
@@ -15,6 +17,10 @@ module.exports = class FilebrowserView extends Backbone.View
       Mousetrap.bind ["ctrl+#{number}", "command+#{number}"], (e) => 
         e.preventDefault()
         @openFileAtIndex(number - 1)
+
+    Mousetrap.bind ["ctrl+w", "command+w"], (e) =>
+      e.preventDefault()
+      @openFiles[@openFile]?.removeFromList()
 
     Backbone.Mediator.sub "filebrowser:open_file", @addFile, this
     Backbone.Mediator.sub "filebrowser:close_file", @removeFile, this
@@ -27,7 +33,7 @@ module.exports = class FilebrowserView extends Backbone.View
     @openFiles[@arrayOpenFiles[index]].open()
 
   setModel: (model) ->
-    @model?.off 'change'
+    @model?.off 'change', @render
     @model = model
     @model.fetchRootFolder() # This loads the files on the root of the project
     @model.on 'change', @render, this
@@ -64,9 +70,14 @@ module.exports = class FilebrowserView extends Backbone.View
 
     # Mark as active
     @openFiles[file.fullPath()].markAsActive()
+    @openFile = file.fullPath()
 
   removeFile: (file) ->
     if _.has(@openFiles, file.fullPath())
       delete @openFiles[file.fullPath()]
-      # Should remove itself form the view
+      @arrayOpenFiles.splice _.indexOf(@arrayOpenFiles, file.fullPath()), 1
+      @openFile = null
+
+      # Should remove itself form the view, but we should "open" an empty file
+      app.code_editor.clearEditor()
 

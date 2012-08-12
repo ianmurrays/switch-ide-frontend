@@ -269,7 +269,7 @@ window.require.define({"models/file": function(exports, require, module) {
       });
     };
 
-    File.prototype.updateContent = function() {
+    File.prototype.updateContent = function(callback) {
       var _this = this;
       if (this.isDirectory()) {
         return;
@@ -285,7 +285,8 @@ window.require.define({"models/file": function(exports, require, module) {
             silent: true
           });
           _this.trigger('change:content');
-          return Backbone.Mediator.pub("status:set", "Saved " + (_this.get('name')));
+          Backbone.Mediator.pub("status:set", "Saved " + (_this.get('name')));
+          return typeof callback === "function" ? callback(data) : void 0;
         }
       });
     };
@@ -493,7 +494,11 @@ window.require.define({"routers/router": function(exports, require, module) {
         id: id
       });
       app.filebrowser.setModel(project);
-      project.fetch();
+      project.fetch({
+        success: function() {
+          return Backbone.Mediator.pub('status:set', "Project Loaded");
+        }
+      });
       return Backbone.Mediator.pub('modal:hide');
     };
 
@@ -536,20 +541,30 @@ window.require.define({"views/code_editor_view": function(exports, require, modu
       });
     };
 
-    CodeEditorView.prototype.updateAndSave = function() {
+    CodeEditorView.prototype.updateAndSave = function(callback) {
       if (this.placeholderModel) {
         return;
       }
       this.model.set('content', this.codemirror.getValue());
-      return this.model.updateContent();
+      return this.model.updateContent(callback);
     };
 
     CodeEditorView.prototype.setFile = function(file) {
       this.updateAndSave();
-      this.model.off('change:content', this);
+      this.model.off('change:content', this.updateContent, this);
       this.model = file;
       this.model.on('change:content', this.updateContent, this);
       return this.placeholderModel = false;
+    };
+
+    CodeEditorView.prototype.clearEditor = function() {
+      var _this = this;
+      this.model.off('change:content', this.updateContent, this);
+      return this.updateAndSave(function() {
+        _this.codemirror.setValue('');
+        _this.model = new File;
+        return _this.placeholderModel = true;
+      });
     };
 
     CodeEditorView.prototype.updateContent = function() {
@@ -645,7 +660,6 @@ window.require.define({"views/file_view": function(exports, require, module) {
       if (!this.allowClose) {
         return;
       }
-      app.logger.log("removing!");
       this.remove();
       return Backbone.Mediator.pub("filebrowser:close_file", this.model);
     };
@@ -684,13 +698,15 @@ window.require.define({"views/file_view": function(exports, require, module) {
 }});
 
 window.require.define({"views/filebrowser_view": function(exports, require, module) {
-  var FileView, FilebrowserView, Project,
+  var File, FileView, FilebrowserView, Project,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   Project = require('models/project');
 
   FileView = require('./file_view');
+
+  File = require('models/file');
 
   module.exports = FilebrowserView = (function(_super) {
 
@@ -706,6 +722,8 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
 
     FilebrowserView.prototype.openFiles = {};
 
+    FilebrowserView.prototype.openFile = null;
+
     FilebrowserView.prototype.arrayOpenFiles = [];
 
     FilebrowserView.prototype.initialize = function() {
@@ -716,6 +734,11 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
           e.preventDefault();
           return _this.openFileAtIndex(number - 1);
         });
+      });
+      Mousetrap.bind(["ctrl+w", "command+w"], function(e) {
+        var _ref;
+        e.preventDefault();
+        return (_ref = _this.openFiles[_this.openFile]) != null ? _ref.removeFromList() : void 0;
       });
       Backbone.Mediator.sub("filebrowser:open_file", this.addFile, this);
       return Backbone.Mediator.sub("filebrowser:close_file", this.removeFile, this);
@@ -731,7 +754,7 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
     FilebrowserView.prototype.setModel = function(model) {
       var _ref;
       if ((_ref = this.model) != null) {
-        _ref.off('change');
+        _ref.off('change', this.render);
       }
       this.model = model;
       this.model.fetchRootFolder();
@@ -775,12 +798,16 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
       _.each(this.openFiles, function(view) {
         return view.unmarkAsActive();
       });
-      return this.openFiles[file.fullPath()].markAsActive();
+      this.openFiles[file.fullPath()].markAsActive();
+      return this.openFile = file.fullPath();
     };
 
     FilebrowserView.prototype.removeFile = function(file) {
       if (_.has(this.openFiles, file.fullPath())) {
-        return delete this.openFiles[file.fullPath()];
+        delete this.openFiles[file.fullPath()];
+        this.arrayOpenFiles.splice(_.indexOf(this.arrayOpenFiles, file.fullPath()), 1);
+        this.openFile = null;
+        return app.code_editor.clearEditor();
       }
     };
 
@@ -1084,7 +1111,7 @@ window.require.define({"views/templates/file": function(exports, require, module
           __out.push('\n    ');
         }
       
-        __out.push('\n  </a>\n\n</div>\n\n<div class="subdirectory file-item"></div>\n');
+        __out.push('\n  </a>\n</div>\n\n<div class="subdirectory file-item"></div>\n');
       
       }).call(this);
       
@@ -1186,7 +1213,7 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
     (function() {
       (function() {
       
-        __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+        __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-file"></i>\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
         __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', '#', {
           icon: 'plus',
@@ -1229,7 +1256,7 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
           icon: 'remove'
         }))));
       
-        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          Project\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-briefcase"></i>\n          Project\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
         __out.push(__sanitize(this.safe(this.helper.menuItem('Build & Run', '#', {
           icon: 'legal',
@@ -1265,7 +1292,65 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push(__sanitize(this.safe(this.helper.divider())));
       
-        __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
+        __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-github"></i>\n          Git\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Create Repo', '#'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Commit', '#', {
+          icon: 'ok',
+          shortcut: '⌘⌥C'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Push', '#', {
+          icon: 'upload-alt',
+          shortcut: '⌘⌥P'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Pull', '#', {
+          icon: 'download-alt',
+          shortcut: '⌘⌥X'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.divider())));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Switch Branch', '#', {
+          icon: 'random'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Merge', '#'))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Tag', '#', {
+          icon: 'tag'
+        }))));
+      
+        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-th-large"></i>\n          Window\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Close', '#', {
+          shortcut: '⌃W'
+        }))));
+      
+        __out.push('\n          <!-- ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Cycle Files', '#', {
+          icon: 'refresh',
+          shortcut: '⌘1..9'
+        }))));
+      
+        __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
       
         __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', {
           shortcut: '⌘B'

@@ -15,21 +15,28 @@ module.exports = class CodeEditorView extends Backbone.View
       # Update the content and save
       @updateAndSave()
 
-  updateAndSave: ->
+  updateAndSave: (callback) ->
     return if @placeholderModel
     @model.set 'content', @codemirror.getValue()
-    @model.updateContent()
+    @model.updateContent(callback)
 
   setFile: (file) ->
     # Unsubscribe from the file and save it
     @updateAndSave()
-    @model.off 'change:content', this
+    @model.off 'change:content', @updateContent, this
 
     # Set the new file and subscribe!
     @model = file
     @model.on 'change:content', @updateContent, this
 
     @placeholderModel = no
+
+  clearEditor: ->
+    @model.off 'change:content', @updateContent, this
+    @updateAndSave =>
+      @codemirror.setValue('')
+      @model = new File
+      @placeholderModel = yes 
 
   updateContent: ->
     @codemirror.setValue @model.get('content')

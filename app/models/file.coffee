@@ -39,7 +39,7 @@ module.exports = class File extends Model
       # Force an update notification
       @trigger 'change:content'
 
-  updateContent: ->
+  updateContent: (callback) ->
     return if @isDirectory()
 
     $.ajax
@@ -51,3 +51,5 @@ module.exports = class File extends Model
         @trigger 'change:content'
 
         Backbone.Mediator.pub "status:set", "Saved #{@get('name')}"
+
+        callback?(data)

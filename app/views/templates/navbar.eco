@@ -5,6 +5,7 @@
     <ul class="nav">
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-file"></i>
           File
           <b class="caret"></b>
         </a>
@@ -23,6 +24,7 @@
     <ul class="nav">
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-briefcase"></i>
           Project
           <b class="caret"></b>
         </a>
@@ -37,7 +39,39 @@
       </li>
     </ul>
 
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-github"></i>
+          Git
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <%= @safe @helper.menuItem 'Create Repo', '#' %>
+          <%= @safe @helper.menuItem 'Commit', '#', icon: 'ok', shortcut: '⌘⌥C' %>
+          <%= @safe @helper.menuItem 'Push', '#', icon: 'upload-alt', shortcut: '⌘⌥P' %>
+          <%= @safe @helper.menuItem 'Pull', '#', icon: 'download-alt', shortcut: '⌘⌥X' %>
+          <%= @safe @helper.divider() %>
+          <%= @safe @helper.menuItem 'Switch Branch', '#', icon: 'random' %>
+          <%= @safe @helper.menuItem 'Merge', '#' %>
+          <%= @safe @helper.menuItem 'Tag', '#', icon: 'tag' %>
+        </ul>
+      </li>
+    </ul>
 
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-th-large"></i>
+          Window
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <%= @safe @helper.menuItem 'Close', '#', shortcut: '⌃W' %>
+          <!-- <%= @safe @helper.menuItem 'Cycle Files', '#', icon: 'refresh', shortcut: '⌘1..9' %> -->
+        </ul>
+      </li>
+    </ul>
 
     <div class="btn-group pull-right">
       <a class="btn btn-success">
