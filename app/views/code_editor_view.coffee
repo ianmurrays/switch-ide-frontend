@@ -16,7 +16,7 @@ module.exports = class CodeEditorView extends Backbone.View
       @updateAndSave()
 
   updateAndSave: (callback) ->
-    return if @placeholderModel
+    return no if @placeholderModel
     @model.set 'content', @codemirror.getValue()
     @model.updateContent(callback)
 

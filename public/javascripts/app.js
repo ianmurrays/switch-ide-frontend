@@ -596,7 +596,7 @@ window.require.define({"views/code_editor_view": function(exports, require, modu
 
     CodeEditorView.prototype.updateAndSave = function(callback) {
       if (this.placeholderModel) {
-        return;
+        return false;
       }
       this.model.set('content', this.codemirror.getValue());
       return this.model.updateContent(callback);
@@ -1294,7 +1294,7 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
     (function() {
       (function() {
       
-        __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-file"></i>\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
+        __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="javascript:;"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          <i class="icon-file"></i>\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
         __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', 'javascript:;', {
           icon: 'plus',

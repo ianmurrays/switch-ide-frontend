@@ -1,6 +1,6 @@
 <div class="navbar-inner">
   <div class="container">
-    <a class="brand" href="#"><strong>Switch IDE</strong></a>
+    <a class="brand" href="javascript:;"><strong>Switch IDE</strong></a>
 
     <ul class="nav">
       <li class="dropdown">
