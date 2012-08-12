@@ -1172,6 +1172,9 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
 .switch-status {
   margin-top: 11px;
   margin-right: 10px; }
+
+.keyboard-shortcut {
+  color: black; }
 /*.ir { display: block; border: 0; text-indent: -999em; overflow: hidden; background-color: transparent; background-repeat: no-repeat; text-align: left; direction: ltr; *line-height: 0; }
 .ir br { display: none; }
 .hidden { display: none !important; visibility: hidden; }

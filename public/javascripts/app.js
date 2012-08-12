@@ -620,6 +620,7 @@ window.require.define({"views/file_view": function(exports, require, module) {
         file: this.model,
         directory: this.directory
       }));
+      this.$el.attr('data-cid', this.model.cid);
       if (this.directory) {
         this.directory.each(function(file) {
           var file_view;
@@ -650,7 +651,9 @@ window.require.define({"views/file_view": function(exports, require, module) {
     };
 
     FileView.prototype.open = function(e) {
-      e.preventDefault();
+      if (e != null) {
+        e.preventDefault();
+      }
       if (this.model.isDirectory()) {
         if (this.directory) {
           app.logger.log("Closing directory " + (this.model.get('name')));
@@ -703,13 +706,33 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
 
     FilebrowserView.prototype.openFiles = {};
 
+    FilebrowserView.prototype.arrayOpenFiles = [];
+
     FilebrowserView.prototype.initialize = function() {
+      var _this = this;
       this.setModel(this.model || new Project());
+      _.each([1, 2, 3, 4, 5, 6, 7, 8, 9], function(number) {
+        return Mousetrap.bind(["ctrl+" + number, "command+" + number], function(e) {
+          e.preventDefault();
+          return _this.openFileAtIndex(number - 1);
+        });
+      });
       Backbone.Mediator.sub("filebrowser:open_file", this.addFile, this);
       return Backbone.Mediator.sub("filebrowser:close_file", this.removeFile, this);
     };
 
+    FilebrowserView.prototype.openFileAtIndex = function(index) {
+      if (!this.arrayOpenFiles[index]) {
+        return;
+      }
+      return this.openFiles[this.arrayOpenFiles[index]].open();
+    };
+
     FilebrowserView.prototype.setModel = function(model) {
+      var _ref;
+      if ((_ref = this.model) != null) {
+        _ref.off('change');
+      }
       this.model = model;
       this.model.fetchRootFolder();
       return this.model.on('change', this.render, this);
@@ -719,6 +742,16 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
       var _this = this;
       app.logger.log("FilebrowserView#render");
       this.$el.html(this.template);
+      this.$('#open_files').sortable({
+        stop: function(event, ui) {
+          return _.each(_this.arrayOpenFiles, function(fullPath) {
+            if (_this.openFiles[fullPath].model.cid === ui.item.attr('data-cid')) {
+              _this.arrayOpenFiles.splice(_.indexOf(_this.arrayOpenFiles, fullPath), 1);
+              return _this.arrayOpenFiles.splice(ui.item.index(), 0, fullPath);
+            }
+          });
+        }
+      });
       this.model.rootFolder.each(function(file) {
         var file_view;
         file_view = new FileView({
@@ -736,6 +769,7 @@ window.require.define({"views/filebrowser_view": function(exports, require, modu
         }, {
           allowClose: true
         });
+        this.arrayOpenFiles.push(file.fullPath());
         this.$('#open_files').append(this.openFiles[file.fullPath()].render().el);
       }
       _.each(this.openFiles, function(view) {
@@ -820,11 +854,15 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       divider: function() {
         return "<li class=\"divider\"></li>";
       },
-      menuItem: function(title, url, icon) {
-        if (icon == null) {
-          icon = "blank";
+      menuItem: function(title, url, options) {
+        if (options == null) {
+          options = {};
         }
-        return "<li>\n  <a href=\"" + url + "\">\n    <i class=\"icon-" + icon + "\"></i>\n    " + title + "\n  </a>\n</li>";
+        options = _.defaults(options, {
+          icon: "blank",
+          shortcut: ""
+        });
+        return "<li>\n  <a href=\"" + url + "\">\n    <i class=\"icon-" + options.icon + "\"></i>\n    " + title + "\n    <div class=\"pull-right keyboard-shortcut\">" + options.shortcut + "</div>\n  </a>\n</li>";
       }
     };
 
@@ -1148,23 +1186,36 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push('<div class="navbar-inner">\n  <div class="container">\n    <a class="brand" href="#"><strong>Switch IDE</strong></a>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          File\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', '#', 'plus'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('New Project', '#', {
+          icon: 'plus',
+          shortcut: '⌘⇧N'
+        }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('New File', '#'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('New File', '#', {
+          shortcut: '⌘N'
+        }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Add Files', '#', 'upload'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Add Files', '#', {
+          icon: 'upload'
+        }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Save', '#', 'save'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Save', '#', {
+          icon: 'save',
+          shortcut: '⌘S'
+        }))));
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Quick Open File', '#', 'fire'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Quick Open', '#', {
+          icon: 'fire',
+          shortcut: '⌘T'
+        }))));
       
         __out.push('\n          ');
       
@@ -1172,23 +1223,70 @@ window.require.define({"views/templates/navbar": function(exports, require, modu
       
         __out.push('\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Close Project', '#', 'remove'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Close Project', '#', {
+          icon: 'remove'
+        }))));
       
-        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
+        __out.push('\n        </ul>\n      </li>\n    </ul>\n\n    <ul class="nav">\n      <li class="dropdown">\n        <a href="#" class="dropdown-toggle" data-toggle="dropdown">\n          Project\n          <b class="caret"></b>\n        </a>\n        <ul class="dropdown-menu">\n          ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', 'legal'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build & Run', '#', {
+          icon: 'legal',
+          shortcut: '⌘R'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', {
+          shortcut: '⌘B'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', '#', {
+          icon: 'play'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', '#', {
+          icon: 'wrench',
+          shortcut: '⌘⇧T'
+        }))));
+      
+        __out.push('\n          ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', {
+          icon: 'save'
+        }))));
+      
+        __out.push('\n          <!-- ');
+      
+        __out.push(__sanitize(this.safe(this.helper.divider())));
+      
+        __out.push(' -->\n        </ul>\n      </li>\n    </ul>\n\n\n\n    <div class="btn-group pull-right">\n      <a class="btn btn-success">\n        <i class="icon-legal"></i>\n        Build & Run\n      </a>\n      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">\n        <span class="caret"></span>\n      </a>\n      <ul class="dropdown-menu">\n        ');
+      
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Build', '#', {
+          shortcut: '⌘B'
+        }))));
       
         __out.push('\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', '#', 'play'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Run', '#', {
+          icon: 'play'
+        }))));
       
         __out.push('\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', '#', 'wrench'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Test', '#', {
+          icon: 'wrench',
+          shortcut: '⌘⇧T'
+        }))));
       
         __out.push('\n        ');
       
-        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', 'save'))));
+        __out.push(__sanitize(this.safe(this.helper.menuItem('Archive', '#', {
+          icon: 'save'
+        }))));
       
         __out.push('\n      </ul>\n    </div>\n\n    <div class="progress progress-striped active pull-right" style="display: none;">\n      <div class="bar" style="width: 100%;"></div>\n    </div>\n\n    <div class="pull-right">\n      <p class="switch-status" style="display: none;"></p>\n    </div>\n  </div>\n</div>');
       

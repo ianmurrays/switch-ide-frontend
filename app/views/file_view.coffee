@@ -23,6 +23,7 @@ module.exports = class FileView extends Backbone.View
 
   render: ->
     @$el.html @template(file: @model, directory: @directory)
+    @$el.attr('data-cid', @model.cid) # For the sortability
 
     if @directory
       @directory.each (file) =>
@@ -45,7 +46,7 @@ module.exports = class FileView extends Backbone.View
     Backbone.Mediator.pub "filebrowser:close_file", @model
 
   open: (e) ->
-    e.preventDefault()
+    e?.preventDefault()
 
     if @model.isDirectory()
       # Is it open?

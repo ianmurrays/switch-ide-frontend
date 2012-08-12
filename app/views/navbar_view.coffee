@@ -29,7 +29,7 @@ module.exports = class NavbarView extends Backbone.View
   cycleStatuses: =>
     if @statuses.length is 0
       @$('.switch-status').fadeOut('fast')
-      
+
       @showingStatus = no
     else
       @$('.switch-status').fadeOut 'fast', =>
@@ -46,14 +46,18 @@ module.exports = class NavbarView extends Backbone.View
       <li class="divider"></li>
     """
 
-    menuItem: (title, url, icon = "blank") -> """
-      <li>
-        <a href="#{url}">
-          <i class="icon-#{icon}"></i>
-          #{title}
-        </a>
-      </li>
-    """
+    menuItem: (title, url, options = {}) -> 
+      options = _.defaults options, {icon: "blank", shortcut: ""}
+
+      """
+        <li>
+          <a href="#{url}">
+            <i class="icon-#{options.icon}"></i>
+            #{title}
+            <div class="pull-right keyboard-shortcut">#{options.shortcut}</div>
+          </a>
+        </li>
+      """
 
   set_status: (status, sticky = no) -> 
     @statuses.push {status: status, sticky: sticky}

@@ -9,16 +9,35 @@
           <b class="caret"></b>
         </a>
         <ul class="dropdown-menu">
-          <%= @safe @helper.menuItem 'New Project', '#', 'plus' %>
-          <%= @safe @helper.menuItem 'New File', '#' %>
-          <%= @safe @helper.menuItem 'Add Files', '#', 'upload' %>
-          <%= @safe @helper.menuItem 'Save', '#', 'save' %>
-          <%= @safe @helper.menuItem 'Quick Open File', '#', 'fire' %>
+          <%= @safe @helper.menuItem 'New Project', '#', icon: 'plus', shortcut: '⌘⇧N' %>
+          <%= @safe @helper.menuItem 'New File', '#', shortcut: '⌘N' %>
+          <%= @safe @helper.menuItem 'Add Files', '#', icon: 'upload' %>
+          <%= @safe @helper.menuItem 'Save', '#', icon: 'save', shortcut: '⌘S' %>
+          <%= @safe @helper.menuItem 'Quick Open', '#', icon: 'fire', shortcut: '⌘T' %>
           <%= @safe @helper.divider() %>
-          <%= @safe @helper.menuItem 'Close Project', '#', 'remove' %>
+          <%= @safe @helper.menuItem 'Close Project', '#', icon: 'remove' %>
         </ul>
       </li>
     </ul>
+
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          Project
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <%= @safe @helper.menuItem 'Build & Run', '#', icon: 'legal', shortcut: '⌘R' %>
+          <%= @safe @helper.menuItem 'Build', '#', shortcut: '⌘B' %>
+          <%= @safe @helper.menuItem 'Run', '#', icon: 'play' %>
+          <%= @safe @helper.menuItem 'Test', '#', icon: 'wrench', shortcut: '⌘⇧T' %>
+          <%= @safe @helper.menuItem 'Archive', '#', icon: 'save' %>
+          <!-- <%= @safe @helper.divider() %> -->
+        </ul>
+      </li>
+    </ul>
+
+
 
     <div class="btn-group pull-right">
       <a class="btn btn-success">
@@ -29,10 +48,10 @@
         <span class="caret"></span>
       </a>
       <ul class="dropdown-menu">
-        <%= @safe @helper.menuItem 'Build', '#', 'legal' %>
-        <%= @safe @helper.menuItem 'Run', '#', 'play' %>
-        <%= @safe @helper.menuItem 'Test', '#', 'wrench' %>
-        <%= @safe @helper.menuItem 'Archive', '#', 'save' %>
+        <%= @safe @helper.menuItem 'Build', '#', shortcut: '⌘B' %>
+        <%= @safe @helper.menuItem 'Run', '#', icon: 'play' %>
+        <%= @safe @helper.menuItem 'Test', '#', icon: 'wrench', shortcut: '⌘⇧T' %>
+        <%= @safe @helper.menuItem 'Archive', '#', icon: 'save' %>
       </ul>
     </div>
 
