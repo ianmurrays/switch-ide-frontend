@@ -895,6 +895,8 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
 
     NavbarView.prototype.showingStatus = false;
 
+    NavbarView.prototype.showProgressTimeout = null;
+
     NavbarView.prototype.events = {
       "click [data-menu_id=build]": "buildProject",
       "click [data-menu_id=build-run]": "buildAndRun",
@@ -977,14 +979,13 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       return this.$('.switch-status').fadeOut('fast');
     };
 
-    NavbarView.showProgressTimeout = null;
-
     NavbarView.prototype.showProgress = function() {
       var _this = this;
       return this.showProgressTimeout = setTimeout(function() {
         _this.$('.progress').css({
           opacity: 0,
-          display: "inline"
+          display: "inline",
+          width: 0
         });
         _this.$('.progress').animate({
           opacity: 1,

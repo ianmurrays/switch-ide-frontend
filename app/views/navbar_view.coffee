@@ -4,6 +4,7 @@ module.exports = class NavbarView extends Backbone.View
 
   statuses: []
   showingStatus: no
+  showProgressTimeout: null
 
   events:
     "click [data-menu_id=build]": "buildProject"
@@ -77,13 +78,13 @@ module.exports = class NavbarView extends Backbone.View
 
   hideStatus: => @$('.switch-status').fadeOut 'fast'
 
-  @showProgressTimeout: null
   showProgress: -> 
 
     @showProgressTimeout = setTimeout =>
       @$('.progress').css
         opacity: 0
         display: "inline"
+        width: 0
 
       @$('.progress').animate
         opacity: 1
