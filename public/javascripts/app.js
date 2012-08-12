@@ -870,10 +870,12 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       if (sticky == null) {
         sticky = false;
       }
-      this.statuses.push({
-        status: status,
-        sticky: sticky
-      });
+      if (!_.include(this.statuses, status)) {
+        this.statuses.push({
+          status: status,
+          sticky: sticky
+        });
+      }
       if (!this.showingStatus) {
         return this.cycleStatuses();
       }
@@ -1082,7 +1084,7 @@ window.require.define({"views/templates/file": function(exports, require, module
           __out.push('\n    ');
         }
       
-        __out.push('\n  </a>\n</div>\n\n<div class="subdirectory file-item"></div>\n');
+        __out.push('\n  </a>\n\n</div>\n\n<div class="subdirectory file-item"></div>\n');
       
       }).call(this);
       

@@ -60,7 +60,7 @@ module.exports = class NavbarView extends Backbone.View
       """
 
   set_status: (status, sticky = no) -> 
-    @statuses.push {status: status, sticky: sticky}
+    @statuses.push {status: status, sticky: sticky} unless _.include @statuses, status
 
     # If we're showing a status, then don't force-change the
     # one being displayed.
