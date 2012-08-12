@@ -240,6 +240,8 @@ window.require.define({"models/file": function(exports, require, module) {
             name: "xml",
             htmlMode: true
           };
+        } else if (this.get('name').match(/\.eco$/)) {
+          return "eco";
         }
       } else {
         return "text";
@@ -626,10 +628,14 @@ window.require.define({"views/code_editor_view": function(exports, require, modu
     };
 
     CodeEditorView.prototype.render = function() {
+      var _this = this;
       this.$el.html(this.template);
       this.codemirror = CodeMirror(this.$el[0], {
         value: this.model.get('content'),
-        lineNumbers: true
+        lineNumbers: true,
+        onCursorActivity: function() {
+          return _this.codemirror.matchHighlight("CodeMirror-matchhighlight");
+        }
       });
       this.$('textarea').addClass("mousetrap");
       return this;

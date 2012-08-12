@@ -16,5 +16,11 @@
       height: 500px; // To be resized with JS
       overflow: auto;
     }
+
+    .CodeMirror-matchhighlight {
+      border: 1px solid gray;
+      background: whitesmoke;
+      border-radius: 3px;
+    }
   }
 }

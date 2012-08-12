@@ -47,5 +47,7 @@ module.exports = class CodeEditorView extends Backbone.View
     @codemirror = CodeMirror @$el[0], 
       value: @model.get('content'), 
       lineNumbers: true
+      onCursorActivity: => @codemirror.matchHighlight("CodeMirror-matchhighlight")
+
     @$('textarea').addClass "mousetrap"
     this

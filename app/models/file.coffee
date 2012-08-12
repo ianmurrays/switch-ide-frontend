@@ -19,6 +19,8 @@ module.exports = class File extends Model
         "markdown"
       else if @get('name').match /\.html?$/
         {name: "xml", htmlMode: yes}
+      else if @get('name').match /\.eco$/
+        "eco"
     else
       "text"
 

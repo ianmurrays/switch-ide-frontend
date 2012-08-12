@@ -1135,6 +1135,10 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
     .code-editor .CodeMirror .CodeMirror-scroll {
       height: 500px;
       overflow: auto; }
+    .code-editor .CodeMirror .CodeMirror-matchhighlight {
+      border: 1px solid gray;
+      background: whitesmoke;
+      border-radius: 3px; }
 #filebrowser {
   position: fixed;
   left: 0;
