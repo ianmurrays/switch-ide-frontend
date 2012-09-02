@@ -1,5 +1,5 @@
 module.exports = class NavbarView extends Backbone.View
-  className: "navbar navbar-fixed-top"
+  className: "navbar navbar-fixed-top navbar-inverse"
   template: require './templates/navbar'
 
   statuses: []
