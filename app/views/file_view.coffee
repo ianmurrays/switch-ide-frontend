@@ -11,7 +11,14 @@ module.exports = class FileView extends Backbone.View
   # we need to make links unique
   events: ->
     events = {}
+    # events["click span.edit"] = "edit"
+    events["contextmenu"] = "contextualMenu"
     events["click a#cid_#{@model.cid}"] = "open"
+
+    # Renaming files
+    # events["blur input"] = "rename"
+    events["keydown input"] = "rename"
+
     events
 
   initialize: (attr, options) ->
@@ -21,13 +28,19 @@ module.exports = class FileView extends Backbone.View
     @model.on 'all', @render, this
 
   render: ->
-    @$el.html @template(file: @model, directory: @directory)
+    @$el.html @template(file: @model, directory: @directory, allowClose: @allowClose)
     @$el.attr('data-cid', @model.cid) # For the sortability
+
+    # Popover
+    @$("[rel=popover]").popover toggle:"manual"
 
     if @directory
       @directory.each (file) =>
         file_view = new FileView(model: file)
         @$('.subdirectory').first().append file_view.render().el
+
+    if @model.get 'isRenaming'
+      @$('input').focus()
 
     this
 
@@ -43,8 +56,22 @@ module.exports = class FileView extends Backbone.View
 
     Backbone.Mediator.pub "filebrowser:close_file", @model
 
+  contextualMenu: (e) ->
+    e.preventDefault() # Prevent the real context menu from appearing
+    e.stopPropagation() # Otherwise the right click selects the text, ugly
+
+    app.contextualFileMenu.show @model, {x: e.pageX, y: e.pageY}
+
+  rename: (e) ->
+    if e.keyCode is 13 # Return
+      console.log @$('input').val()
+      @model.rename @$('input').val()
+      @$('input').attr('disabled', 'disabled')
+
   open: (e) ->
     e?.preventDefault()
+
+    return if @model.get 'isRenaming'
 
     if @model.isDirectory()
       # Is it open?

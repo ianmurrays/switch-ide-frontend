@@ -24,12 +24,18 @@ module.exports = class File extends Model
     else
       "text"
 
-  fullPath: -> "#{@get('parent')}/#{@get('name')}"
+  fullPath: -> @fullPathNamed(@get('name'))
+  fullPathNamed: (name) -> "#{@get('parent')}/#{name}"
 
-  railsPath: (method) ->
+  railsPath: (method, params = {}) ->
     path = [app.baseUrl, "projects", @project.get('id'), "files", method].join("/")
     path += "?path=#{[@get('parent'), @get('name')].join "/"}" # Had to do this like this in order to play
-                                    # nicely with rails.
+                                                               # nicely with rails.
+
+    for key in _.keys(params)
+      path += "&#{key}=#{params[key]}"
+
+    path
 
   # Lazy-loads the content, calls the callback with the content when done
   fetchContent: ->
@@ -56,3 +62,12 @@ module.exports = class File extends Model
         Backbone.Mediator.pub "status:set", "Saved #{@get('name')}"
 
         callback?(data)
+
+  rename: (newName) ->
+    $.ajax
+      url: @railsPath('rename', new_path:@fullPathNamed(newName)), 
+      type: 'PUT',
+      success: (data) =>
+        @set 'name', newName
+        @set 'isRenaming', no
+        Backbone.Mediator.pub "status:set", "Renamed #{@get('name')}"
