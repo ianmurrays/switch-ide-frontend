@@ -3,6 +3,7 @@ Navbar = require 'views/navbar_view'
 Filebrowser = require 'views/filebrowser_view'
 CodeEditor = require 'views/code_editor_view'
 Projects = require 'models/projects'
+ContextualFileMenu = require 'views/contextual_file_menu_view'
 Logger = require 'logger'
 
 module.exports = class Application
@@ -18,11 +19,17 @@ module.exports = class Application
     @logger = new Logger
     @logger.logging = on # Disable in production
 
+    @contextualFileMenu = new ContextualFileMenu
+
     @renderEssentialComponents()
     @setupShortcuts()
 
     # Need to do this everytime the window is resized.
     $(window).resize => @resizeComponents()
+
+    # Hide all dropdowns if clicking elsewhere, or remove them
+    # if applicable
+    $('body').live 'click', => @contextualFileMenu.hide()
 
   # Setup global shortcuts, other components should setup their
   # own shortcuts

@@ -1,0 +1,6 @@
+<ul class="dropdown-menu">
+  <li><a href="javascript:;" class="new-file">New File</a></li>
+  <li><a href="javascript:;" class="new-folder">New Folder</a></li>
+  <li><a href="javascript:;" class="rename-file">Rename</a></li>
+  <li><a href="javascript:;" class="delete-file">Delete</a></li>
+</ul>

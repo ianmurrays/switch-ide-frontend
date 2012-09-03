@@ -4009,11 +4009,11 @@ a.thumbnail:hover {
   background-size: 40px 40px;
 }
 .progress.active .bar {
-  -webkit-animation: progress-bar-stripes 2s linear infinite;
-  -moz-animation: progress-bar-stripes 2s linear infinite;
-  -ms-animation: progress-bar-stripes 2s linear infinite;
-  -o-animation: progress-bar-stripes 2s linear infinite;
-  animation: progress-bar-stripes 2s linear infinite;
+  -webkit-animation: progress-bar-stripes 0.5s linear infinite;
+  -moz-animation: progress-bar-stripes 0.5s linear infinite;
+  -ms-animation: progress-bar-stripes 0.5s linear infinite;
+  -o-animation: progress-bar-stripes 0.5s linear infinite;
+  animation: progress-bar-stripes 0.5s linear infinite;
 }
 .progress-danger .bar,
 .progress .bar-danger {
@@ -5304,6 +5304,9 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
       border: 1px solid gray;
       background: whitesmoke;
       border-radius: 3px; }
+.contextual-menu {
+  display: none;
+  position: absolute; }
 #filebrowser {
   position: fixed;
   left: 0;
@@ -5318,8 +5321,12 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
     padding-left: 15px; }
   #filebrowser .file-container .file-item {
     line-height: 18px; }
-    #filebrowser .file-container .file-item .edit {
-      font-size: 10px; }
+    #filebrowser .file-container .file-item input.rename-field {
+      height: 19px;
+      border: 0;
+      padding: 0;
+      margin: 0;
+      padding-top: 1px; }
     #filebrowser .file-container .file-item [class^="icon-"] {
       margin-right: 2px;
       color: #555; }
@@ -5338,7 +5345,7 @@ li[class^="icon-"].icon-large:before, li[class*=" icon-"].icon-large:before {
     text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.2);
     background-color: #0088cc; }
 .progress {
-  margin: 15px 0 0 0;
+  margin: 15px 10px 0 0;
   width: 150px;
   height: 10px; }
 

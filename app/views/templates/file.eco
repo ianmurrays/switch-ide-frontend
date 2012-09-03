@@ -8,15 +8,19 @@
         <i class="icon-folder-close"></i>
       <% end %>
 
-      <%= @file.get('name') %>
-
     <% else: %>
+      
       <% if @file.isView(): %>
         <i class="icon-eye-open"></i> 
       <% else: %>
         <i class="icon-file"></i> 
       <% end %>
 
+    <% end %>
+
+    <% if @file.get('isRenaming') and not @allowClose: %>
+      <input type="text" value="<%= @file.get('name') %>" class="input-medium rename-field">
+    <% else: %>
       <%= @file.get('name') %>
     <% end %>
   </a>

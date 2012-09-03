@@ -17,6 +17,14 @@
     .file-item {
       line-height: 18px;
 
+      input.rename-field {
+        height: 19px;
+        border: 0;
+        padding: 0;
+        margin: 0;
+        padding-top: 1px;
+      }
+
       [class^="icon-"] {
         margin-right: 2px;
         color: #555;

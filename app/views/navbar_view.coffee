@@ -105,7 +105,7 @@ module.exports = class NavbarView extends Backbone.View
 
       @$('.progress').animate
         opacity: 1
-        width: 150
+        width: 100
 
       @showProgressTimeout = null
     , 500

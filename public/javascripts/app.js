@@ -75,7 +75,7 @@
 })();
 
 window.require.define({"application": function(exports, require, module) {
-  var Application, CodeEditor, Filebrowser, Logger, Navbar, Projects, Router;
+  var Application, CodeEditor, ContextualFileMenu, Filebrowser, Logger, Navbar, Projects, Router;
 
   Router = require('routers/router');
 
@@ -86,6 +86,8 @@ window.require.define({"application": function(exports, require, module) {
   CodeEditor = require('views/code_editor_view');
 
   Projects = require('models/projects');
+
+  ContextualFileMenu = require('views/contextual_file_menu_view');
 
   Logger = require('logger');
 
@@ -108,10 +110,14 @@ window.require.define({"application": function(exports, require, module) {
       this.router = new Router;
       this.logger = new Logger;
       this.logger.logging = true;
+      this.contextualFileMenu = new ContextualFileMenu;
       this.renderEssentialComponents();
       this.setupShortcuts();
-      return $(window).resize(function() {
+      $(window).resize(function() {
         return _this.resizeComponents();
+      });
+      return $('body').live('click', function() {
+        return _this.contextualFileMenu.hide();
       });
     };
 
@@ -249,13 +255,26 @@ window.require.define({"models/file": function(exports, require, module) {
     };
 
     File.prototype.fullPath = function() {
-      return "" + (this.get('parent')) + "/" + (this.get('name'));
+      return this.fullPathNamed(this.get('name'));
     };
 
-    File.prototype.railsPath = function(method) {
-      var path;
+    File.prototype.fullPathNamed = function(name) {
+      return "" + (this.get('parent')) + "/" + name;
+    };
+
+    File.prototype.railsPath = function(method, params) {
+      var key, path, _i, _len, _ref;
+      if (params == null) {
+        params = {};
+      }
       path = [app.baseUrl, "projects", this.project.get('id'), "files", method].join("/");
-      return path += "?path=" + ([this.get('parent'), this.get('name')].join("/"));
+      path += "?path=" + ([this.get('parent'), this.get('name')].join("/"));
+      _ref = _.keys(params);
+      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+        key = _ref[_i];
+        path += "&" + key + "=" + params[key];
+      }
+      return path;
     };
 
     File.prototype.fetchContent = function() {
@@ -290,6 +309,21 @@ window.require.define({"models/file": function(exports, require, module) {
           _this.trigger('change:content');
           Backbone.Mediator.pub("status:set", "Saved " + (_this.get('name')));
           return typeof callback === "function" ? callback(data) : void 0;
+        }
+      });
+    };
+
+    File.prototype.rename = function(newName) {
+      var _this = this;
+      return $.ajax({
+        url: this.railsPath('rename', {
+          new_path: this.fullPathNamed(newName)
+        }),
+        type: 'PUT',
+        success: function(data) {
+          _this.set('name', newName);
+          _this.set('isRenaming', false);
+          return Backbone.Mediator.pub("status:set", "Renamed " + (_this.get('name')));
         }
       });
     };
@@ -647,6 +681,63 @@ window.require.define({"views/code_editor_view": function(exports, require, modu
   
 }});
 
+window.require.define({"views/contextual_file_menu_view": function(exports, require, module) {
+  var ContextualFileMenuView,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+  module.exports = ContextualFileMenuView = (function(_super) {
+
+    __extends(ContextualFileMenuView, _super);
+
+    function ContextualFileMenuView() {
+      return ContextualFileMenuView.__super__.constructor.apply(this, arguments);
+    }
+
+    ContextualFileMenuView.prototype.template = require('./templates/contextual_file_menu');
+
+    ContextualFileMenuView.prototype.tagName = "div";
+
+    ContextualFileMenuView.prototype.className = "dropdown contextual-menu";
+
+    ContextualFileMenuView.prototype.events = {
+      "click .rename-file": "rename"
+    };
+
+    ContextualFileMenuView.prototype.initialize = function() {
+      return this.render();
+    };
+
+    ContextualFileMenuView.prototype.show = function(model, position) {
+      this.model = model;
+      this.$el.css({
+        left: position.x,
+        top: position.y
+      });
+      this.$('.dropdown-menu').show();
+      return this.$el.show();
+    };
+
+    ContextualFileMenuView.prototype.hide = function() {
+      return this.$el.hide();
+    };
+
+    ContextualFileMenuView.prototype.render = function() {
+      this.$el.html(this.template());
+      return this.$el.appendTo('body');
+    };
+
+    ContextualFileMenuView.prototype.rename = function() {
+      this.hide();
+      return this.model.set('isRenaming', true);
+    };
+
+    return ContextualFileMenuView;
+
+  })(Backbone.View);
+  
+}});
+
 window.require.define({"views/file_view": function(exports, require, module) {
   var FileView, Files,
     __hasProp = {}.hasOwnProperty,
@@ -675,7 +766,9 @@ window.require.define({"views/file_view": function(exports, require, module) {
     FileView.prototype.events = function() {
       var events;
       events = {};
+      events["contextmenu"] = "contextualMenu";
       events["click a#cid_" + this.model.cid] = "open";
+      events["keydown input"] = "rename";
       return events;
     };
 
@@ -692,9 +785,13 @@ window.require.define({"views/file_view": function(exports, require, module) {
       var _this = this;
       this.$el.html(this.template({
         file: this.model,
-        directory: this.directory
+        directory: this.directory,
+        allowClose: this.allowClose
       }));
       this.$el.attr('data-cid', this.model.cid);
+      this.$("[rel=popover]").popover({
+        toggle: "manual"
+      });
       if (this.directory) {
         this.directory.each(function(file) {
           var file_view;
@@ -703,6 +800,9 @@ window.require.define({"views/file_view": function(exports, require, module) {
           });
           return _this.$('.subdirectory').first().append(file_view.render().el);
         });
+      }
+      if (this.model.get('isRenaming')) {
+        this.$('input').focus();
       }
       return this;
     };
@@ -723,9 +823,29 @@ window.require.define({"views/file_view": function(exports, require, module) {
       return Backbone.Mediator.pub("filebrowser:close_file", this.model);
     };
 
+    FileView.prototype.contextualMenu = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return app.contextualFileMenu.show(this.model, {
+        x: e.pageX,
+        y: e.pageY
+      });
+    };
+
+    FileView.prototype.rename = function(e) {
+      if (e.keyCode === 13) {
+        console.log(this.$('input').val());
+        this.model.rename(this.$('input').val());
+        return this.$('input').attr('disabled', 'disabled');
+      }
+    };
+
     FileView.prototype.open = function(e) {
       if (e != null) {
         e.preventDefault();
+      }
+      if (this.model.get('isRenaming')) {
+        return;
       }
       if (this.model.isDirectory()) {
         if (this.directory) {
@@ -893,7 +1013,7 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
       return NavbarView.__super__.constructor.apply(this, arguments);
     }
 
-    NavbarView.prototype.className = "navbar navbar-fixed-top";
+    NavbarView.prototype.className = "navbar navbar-fixed-top navbar-inverse";
 
     NavbarView.prototype.template = require('./templates/navbar');
 
@@ -1010,7 +1130,7 @@ window.require.define({"views/navbar_view": function(exports, require, module) {
         });
         _this.$('.progress').animate({
           opacity: 1,
-          width: 150
+          width: 100
         });
         return _this.showProgressTimeout = null;
       }, 500);
@@ -1156,6 +1276,57 @@ window.require.define({"views/templates/code_editor": function(exports, require,
   }
 }});
 
+window.require.define({"views/templates/contextual_file_menu": function(exports, require, module) {
+  module.exports = function (__obj) {
+    if (!__obj) __obj = {};
+    var __out = [], __capture = function(callback) {
+      var out = __out, result;
+      __out = [];
+      callback.call(this);
+      result = __out.join('');
+      __out = out;
+      return __safe(result);
+    }, __sanitize = function(value) {
+      if (value && value.ecoSafe) {
+        return value;
+      } else if (typeof value !== 'undefined' && value != null) {
+        return __escape(value);
+      } else {
+        return '';
+      }
+    }, __safe, __objSafe = __obj.safe, __escape = __obj.escape;
+    __safe = __obj.safe = function(value) {
+      if (value && value.ecoSafe) {
+        return value;
+      } else {
+        if (!(typeof value !== 'undefined' && value != null)) value = '';
+        var result = new String(value);
+        result.ecoSafe = true;
+        return result;
+      }
+    };
+    if (!__escape) {
+      __escape = __obj.escape = function(value) {
+        return ('' + value)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;');
+      };
+    }
+    (function() {
+      (function() {
+      
+        __out.push('<ul class="dropdown-menu">\n  <li><a href="javascript:;" class="new-file">New File</a></li>\n  <li><a href="javascript:;" class="new-folder">New Folder</a></li>\n  <li><a href="javascript:;" class="rename-file">Rename</a></li>\n  <li><a href="javascript:;" class="delete-file">Delete</a></li>\n</ul>');
+      
+      }).call(this);
+      
+    }).call(__obj);
+    __obj.safe = __objSafe, __obj.escape = __escape;
+    return __out.join('');
+  }
+}});
+
 window.require.define({"views/templates/file": function(exports, require, module) {
   module.exports = function (__obj) {
     if (!__obj) __obj = {};
@@ -1210,17 +1381,25 @@ window.require.define({"views/templates/file": function(exports, require, module
           } else {
             __out.push('\n        <i class="icon-folder-close"></i>\n      ');
           }
-          __out.push('\n\n      ');
-          __out.push(__sanitize(this.file.get('name')));
           __out.push('\n\n    ');
         } else {
-          __out.push('\n      ');
+          __out.push('\n      \n      ');
           if (this.file.isView()) {
             __out.push('\n        <i class="icon-eye-open"></i> \n      ');
           } else {
             __out.push('\n        <i class="icon-file"></i> \n      ');
           }
-          __out.push('\n\n      ');
+          __out.push('\n\n    ');
+        }
+      
+        __out.push('\n\n    ');
+      
+        if (this.file.get('isRenaming') && !this.allowClose) {
+          __out.push('\n      <input type="text" value="');
+          __out.push(__sanitize(this.file.get('name')));
+          __out.push('" class="input-medium rename-field">\n    ');
+        } else {
+          __out.push('\n      ');
           __out.push(__sanitize(this.file.get('name')));
           __out.push('\n    ');
         }
