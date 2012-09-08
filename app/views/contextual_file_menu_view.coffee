@@ -5,6 +5,7 @@ module.exports = class ContextualFileMenuView extends Backbone.View
 
   events:
     "click .rename-file": "rename"
+    "click .delete-file": "delete"
 
   initialize: ->
     @render() # This doesn't show anything, but it binds the events.
@@ -28,3 +29,9 @@ module.exports = class ContextualFileMenuView extends Backbone.View
     @hide()
 
     @model.set('isRenaming', yes)
+
+  delete: ->
+    @hide()
+
+    bootbox.confirm "Are you sure you want to delete #{@model.get('name')}? This cannot be undone.", (result) =>
+      @model.delete() if (result)

@@ -71,3 +71,12 @@ module.exports = class File extends Model
         @set 'name', newName
         @set 'isRenaming', no
         Backbone.Mediator.pub "status:set", "Renamed #{@get('name')}"
+
+  delete: ->
+    $.ajax
+      url: @railsPath('destroy'), 
+      type: 'DELETE',
+      success: (data) =>
+        Backbone.Mediator.pub "status:set", "Deleted #{@get('name')}"
+        @destroy()
+

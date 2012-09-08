@@ -16,7 +16,6 @@ module.exports = class FileView extends Backbone.View
     events["click a#cid_#{@model.cid}"] = "open"
 
     # Renaming files
-    # events["blur input"] = "rename"
     events["keydown input"] = "rename"
 
     events
@@ -26,13 +25,13 @@ module.exports = class FileView extends Backbone.View
       @allowClose = options.allowClose if options.allowClose
 
     @model.on 'all', @render, this
+    @model.on 'destroy', =>
+      app.code_editor.clearEditor(save: no)
+      @remove()
 
   render: ->
     @$el.html @template(file: @model, directory: @directory, allowClose: @allowClose)
     @$el.attr('data-cid', @model.cid) # For the sortability
-
-    # Popover
-    @$("[rel=popover]").popover toggle:"manual"
 
     if @directory
       @directory.each (file) =>

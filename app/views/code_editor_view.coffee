@@ -31,12 +31,19 @@ module.exports = class CodeEditorView extends Backbone.View
 
     @placeholderModel = no
 
-  clearEditor: ->
+  clearEditor: (options = {save: yes}) ->
     @model.off 'change:content', @updateContent, this
-    @updateAndSave =>
+
+    callback = =>
       @codemirror.setValue('')
       @model = new File
       @placeholderModel = yes 
+
+    if (options.save)
+      @updateAndSave(callback)
+    else
+      callback()
+      
 
   updateContent: ->
     @codemirror.setValue @model.get('content')
