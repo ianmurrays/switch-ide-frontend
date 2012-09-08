@@ -24,6 +24,7 @@ module.exports = class FilebrowserView extends Backbone.View
 
     Backbone.Mediator.sub "filebrowser:open_file", @addFile, this
     Backbone.Mediator.sub "filebrowser:close_file", @removeFile, this
+    Backbone.Mediator.sub "file:renamed", @renamedFile, this
 
   openFileAtIndex: (index) ->
     # Skip this if there's no file there, duh
@@ -80,4 +81,9 @@ module.exports = class FilebrowserView extends Backbone.View
 
       # Should remove itself form the view, but we should "open" an empty file
       app.code_editor.clearEditor()
+
+  renamedFile: (file, previous) ->
+    if _.has(@openFiles, file.fullPathNamed(previous))
+      @openFiles[file.fullPath()] = @openFiles[file.fullPathNamed(previous)]
+      delete @openFiles[file.fullPathNamed(previous)]
 

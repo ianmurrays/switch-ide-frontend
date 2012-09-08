@@ -68,9 +68,11 @@ module.exports = class File extends Model
       url: @railsPath('rename', new_path:@fullPathNamed(newName)), 
       type: 'PUT',
       success: (data) =>
+        previous = @get 'name'
         @set 'name', newName
         @set 'isRenaming', no
         Backbone.Mediator.pub "status:set", "Renamed #{@get('name')}"
+        Backbone.Mediator.pub "file:renamed", this, previous
 
   delete: ->
     $.ajax

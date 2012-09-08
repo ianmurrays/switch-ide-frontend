@@ -29,6 +29,14 @@ module.exports = class FileView extends Backbone.View
       app.code_editor.clearEditor(save: no)
       @remove()
 
+    # If another view starts renaming, stop renaming this one.
+    Backbone.Mediator.sub "fileview:startedRenaming", @stopRenaming, this
+
+    # The moment we start renaming, tell every other view about it
+    # so they can stop renaming!
+    @model.on 'change:isRenaming', (model, renaming) =>
+      Backbone.Mediator.pub "fileview:startedRenaming", this if renaming
+
   render: ->
     @$el.html @template(file: @model, directory: @directory, allowClose: @allowClose)
     @$el.attr('data-cid', @model.cid) # For the sortability
@@ -63,9 +71,14 @@ module.exports = class FileView extends Backbone.View
 
   rename: (e) ->
     if e.keyCode is 13 # Return
-      console.log @$('input').val()
       @model.rename @$('input').val()
       @$('input').attr('disabled', 'disabled')
+    else if e.keyCode is 27 # Esc
+      @model.set 'isRenaming', no
+
+  stopRenaming: (model) ->
+    if model isnt this
+      @model.set 'isRenaming', no
 
   open: (e) ->
     e?.preventDefault()
