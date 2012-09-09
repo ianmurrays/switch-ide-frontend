@@ -67,7 +67,7 @@ module.exports = class FileView extends Backbone.View
     e.preventDefault() # Prevent the real context menu from appearing
     e.stopPropagation() # Otherwise the right click selects the text, ugly
 
-    app.contextualFileMenu.show @model, {x: e.pageX, y: e.pageY}
+    app.contextualFileMenu.show @model, this, {x: e.pageX, y: e.pageY}
 
   rename: (e) ->
     if e.keyCode is 13 # Return
@@ -97,6 +97,7 @@ module.exports = class FileView extends Backbone.View
         app.logger.log "Opening directory #{@model.get('name')}"
         @directory = new Files null, project: @model.project, path: @model.fullPath()
         @directory.on 'reset', @render, this
+        @directory.on 'add', @render, this
         @directory.fetch()
     else
       app.logger.log "Opening file #{@model.get('name')}"

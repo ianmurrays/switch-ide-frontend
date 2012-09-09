@@ -13,7 +13,8 @@ module.exports = class FilesCollection extends Collection
       @url += "?path=#{@path}"
 
     @bind 'reset', @sort, this
-    @bind 'reset', @applyProjectToFile, this
+    @bind 'reset', @applyProjectToFiles, this
+    @bind 'add', @applyProjectToFile, this
 
   sort: ->
     grouped = @groupBy (file) -> file.get('type')
@@ -21,5 +22,7 @@ module.exports = class FilesCollection extends Collection
     if grouped.directory and grouped.file
       @reset _.union(grouped.directory, grouped.file), silent: true # The silent part is important! ∞ loops  
 
-  applyProjectToFile: ->
-    @each (file) => file.project = @project
+  applyProjectToFiles: ->
+    @each (file) => @applyProjectToFile(file)
+
+  applyProjectToFile: (file) -> file.project = @project

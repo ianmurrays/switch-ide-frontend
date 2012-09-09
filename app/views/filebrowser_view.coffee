@@ -35,9 +35,11 @@ module.exports = class FilebrowserView extends Backbone.View
 
   setModel: (model) ->
     @model?.off 'change', @render, this
+    @model?.rootFolder?.off 'change', @render, this
     @model = model
     @model.on 'change', @render, this
-    @model.fetchRootFolder() # This loads the files on the root of the project
+    @model.fetchRootFolder =>  # This loads the files on the root of the project
+      @model.rootFolder.on 'add', @render, this
 
   render: ->
     app.logger.log "FilebrowserView#render"
