@@ -19,8 +19,6 @@ module.exports = class FilesCollection extends Collection
 
   sort: ->
     grouped = @groupBy (file) -> file.get('type')
-
-    console.log grouped
     
     if grouped.directory and grouped.file
       directories = _.sortBy grouped.directory, (dir) -> dir.get('name').toLowerCase()
