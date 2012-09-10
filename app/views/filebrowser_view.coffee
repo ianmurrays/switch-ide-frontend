@@ -35,15 +35,18 @@ module.exports = class FilebrowserView extends Backbone.View
 
   setModel: (model) ->
     @model?.off 'change', @render, this
+    @model?.rootFolder?.off 'change', @render, this
     @model = model
     @model.on 'change', @render, this
-    @model.fetchRootFolder() # This loads the files on the root of the project
+    @model.fetchRootFolder =>  # This loads the files on the root of the project
+      @model.rootFolder.on 'add', @render, this
 
   render: ->
     app.logger.log "FilebrowserView#render"
     @$el.html @template
 
     @$('#open_files').sortable
+      axis: "y"
       stop: (event, ui) =>
         # console.log ui.item.attr('data-cid')
         _.each @arrayOpenFiles, (fullPath) =>

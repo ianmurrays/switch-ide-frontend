@@ -8,12 +8,43 @@ module.exports = class Project extends Model
   initialize: ->
     @rootFolder = new Files
 
-  fetchRootFolder: ->
+  fetchRootFolder: (callback) ->
     if @get('id')
       @rootFolder = new Files null, path: "/", project: this
-      @rootFolder.fetch()
+      @rootFolder.fetch
+        success: -> callback?()
 
   railsPath: (method) -> path = [app.baseUrl, "projects", @get('id'), method].join("/")
+
+  # Used to create files and folders, depending on options.type
+  newFile: (options) ->
+    parent = options.model
+    fileView = options.fileView
+    name = options.name
+    type = options.type
+
+    # First, was the clicked parent a file or a directory?
+    if parent.isDirectory()
+      parentDirectory = parent.fullPath()
+      collection = fileView.directory
+    else
+      parentDirectory = parent.get('parent')
+      collection = parent.collection
+
+    console.log collection
+
+    $.ajax
+      url: @railsPath("files/new_file") + "?path=#{parentDirectory}"
+      data: 
+        name: name
+        type: type
+      type: "POST"
+      success: (response) =>
+        if response.result is "exists"
+          # The file exists already then
+          bootbox.alert "A file or folder named #{name} already exists in that path"
+        else
+          collection.add response.data if collection
 
   runProject: (callback) ->
     Backbone.Mediator.pub "status:set", "Starting server..."
