@@ -13,9 +13,13 @@ module.exports = class ContextualFileMenuView extends Backbone.View
   initialize: ->
     @render() # This doesn't show anything, but it binds the events.
 
+    @$el.appendTo('body')
+
   show: (model, fileView, position) ->
     @model = model
     @fileView = fileView
+
+    @render() # Update options on the menu
 
     @$el.css(left: position.x, top: position.y)
     
@@ -25,9 +29,7 @@ module.exports = class ContextualFileMenuView extends Backbone.View
   hide: -> @$el.hide()
 
   render: ->
-    @$el.html @template()
-
-    @$el.appendTo('body')
+    @$el.html @template(allowClose:@fileView?.allowClose)
         
   rename: ->
     @hide()
