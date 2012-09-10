@@ -8,6 +8,7 @@ module.exports = class ContextualFileMenuView extends Backbone.View
     "click .rename-file": "rename"
     "click .delete-file": "delete"
     "click .new-file": "newFile"
+    "click .new-folder": "newFolder"
 
   initialize: ->
     @render() # This doesn't show anything, but it binds the events.
@@ -43,4 +44,20 @@ module.exports = class ContextualFileMenuView extends Backbone.View
     @hide()
 
     bootbox.prompt "New File", (name) =>
-      app.project.newFile(@model, @fileView, name) unless name is null or name is ""
+      unless name is null or name is ""
+        app.project.newFile
+          model: @model
+          fileView: @fileView
+          name: name
+          type: "file"
+
+  newFolder: ->
+    @hide()
+
+    bootbox.prompt "New Folder", (name) =>
+      unless name is null or name is ""
+        app.project.newFile
+          model: @model
+          fileView: @fileView
+          name: name
+          type: "folder"

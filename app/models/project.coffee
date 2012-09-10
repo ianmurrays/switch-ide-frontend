@@ -16,7 +16,13 @@ module.exports = class Project extends Model
 
   railsPath: (method) -> path = [app.baseUrl, "projects", @get('id'), method].join("/")
 
-  newFile: (parent, fileView, name) ->
+  # Used to create files and folders, depending on options.type
+  newFile: (options) ->
+    parent = options.model
+    fileView = options.fileView
+    name = options.name
+    type = options.type
+
     # First, was the clicked parent a file or a directory?
     if parent.isDirectory()
       parentDirectory = parent.fullPath()
@@ -31,6 +37,7 @@ module.exports = class Project extends Model
       url: @railsPath("files/new_file") + "?path=#{parentDirectory}"
       data: 
         name: name
+        type: type
       type: "POST"
       success: (response) =>
         if response.result is "exists"
