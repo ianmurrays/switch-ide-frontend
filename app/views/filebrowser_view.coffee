@@ -46,6 +46,7 @@ module.exports = class FilebrowserView extends Backbone.View
     @$el.html @template
 
     @$('#open_files').sortable
+      axis: "y"
       stop: (event, ui) =>
         # console.log ui.item.attr('data-cid')
         _.each @arrayOpenFiles, (fullPath) =>
