@@ -101,9 +101,19 @@ module.exports = class FileView extends Backbone.View
         @directory.fetch()
     else
       app.logger.log "Opening file #{@model.get('name')}"
-      app.code_editor.setFile @model
+
+      app.view_editor.hide()
+      app.code_editor.hide()
+
+      if @model.isView()
+        app.view_editor.setFile @model
+        app.code_editor.updateAndSave()
+        app.view_editor.show()
+      else
+        app.code_editor.setFile @model
+        app.code_editor.show()
+      
       @model.fetchContent()
 
       # This adds the file to the open file list
       Backbone.Mediator.pub "filebrowser:open_file", @model
-

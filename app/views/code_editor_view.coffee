@@ -44,7 +44,6 @@ module.exports = class CodeEditorView extends Backbone.View
     else
       callback()
       
-
   updateContent: ->
     @codemirror.setValue @model.get('content')
     @codemirror.setOption "mode", @model.codeMode()
@@ -58,3 +57,6 @@ module.exports = class CodeEditorView extends Backbone.View
 
     @$('textarea').addClass "mousetrap"
     this
+
+  show: -> @$el.fadeIn()
+  hide: -> @$el.fadeOut()

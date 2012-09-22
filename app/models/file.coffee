@@ -41,7 +41,7 @@ module.exports = class File extends Model
   fetchContent: ->
     return if @isDirectory() # Folders don't have any content you silly
 
-    $.getJSON @railsPath('get_content'), (data) => 
+    $.getJSON @railsPath('content'), (data) => 
       @set 'content', data.content, silent: true
 
       # Force an update notification
@@ -52,7 +52,7 @@ module.exports = class File extends Model
 
     Backbone.Mediator.pub "status:set", "Saving #{@get('name')} ..."
     $.ajax
-      url: @railsPath('save_content'), 
+      url: @railsPath('content'), 
       type: 'PUT',
       data: {content: @get('content')},
       success: (data) =>

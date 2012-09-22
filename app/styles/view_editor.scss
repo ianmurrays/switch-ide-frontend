@@ -1,0 +1,56 @@
+@import 'configuration';
+
+.view-editor {
+  position: fixed;
+  height: 100%;
+  width: 100%;
+  left: $filebrowser_width + 5px;
+
+  .hovering {
+    border: 2px dashed yellow;
+  }
+
+  #view_container {
+    min-height: 50px;
+  }
+
+  #component_sidebar {
+    background: whiteSmoke;
+    overflow-y: auto;
+    box-shadow: 0 0 15px #666;
+    position: fixed;
+    height: 100%;
+    width: $filebrowser_width;
+    right: 0px;
+    top: 40px;
+
+    div.switch-component {
+      border: 0;
+
+      .preview {
+        display: inline;
+      }
+
+      .name {
+        display: inline;
+      }
+
+      .payload {
+        display: none;
+      }
+    }
+
+    li.component:hover {
+      background: #eee;
+    }
+  }
+}
+
+// Has to be a top-level class in order for it 
+// to style properly during dragging
+div.switch-component {
+  padding-left: 5px;
+  line-height: 40px;
+  cursor: move;
+  height: 40px;
+}

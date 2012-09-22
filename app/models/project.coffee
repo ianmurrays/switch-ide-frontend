@@ -34,7 +34,7 @@ module.exports = class Project extends Model
     console.log collection
 
     $.ajax
-      url: @railsPath("files/new_file") + "?path=#{parentDirectory}"
+      url: @railsPath("files/new") + "?path=#{parentDirectory}"
       data: 
         name: name
         type: type

@@ -1,0 +1,51 @@
+<div id="view_container">
+  <%= @safe(@view) %>
+</div>
+
+<div id="component_sidebar" class="component-sidebar">
+  <!-- <div class="switch-component">
+    <div class="preview">
+      &lt;html&gt;
+    </div>
+    Custom HTML code
+  </div> -->
+
+  <div class="switch-component" data-component-type="button">
+    <div class="payload">
+      <button type="button" class="btn btn-primary">Button</button>
+    </div>
+
+    <div class="preview">
+      <button class="btn btn-primary btn-small">Button</button>
+    </div>
+    <span class="name">Button</span>
+  </div>
+
+  <div class="switch-component" data-component-type="button">
+    <div class="payload">
+      <div class="btn-group">
+        <button class="btn">Left</button>
+        <button class="btn">Middle</button>
+        <button class="btn">Right</button>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Button Group</span>
+  </div>
+
+  <div class="switch-component" data-component-type="a">
+    <div class="payload"><a href="javascript:;">Link</a></div>
+    <div class="preview">
+      <a href="javascript:;">&lt;a href&gt;</a>
+    </div>
+    <span class="name">Link</span>
+  </div>
+
+  <div class="switch-component">
+    <div class="preview">
+      <input type="text" style="width: 30px;" placeholder="Text">
+    </div>
+    <span class="name">Input</span>
+  </div>
+</div>
