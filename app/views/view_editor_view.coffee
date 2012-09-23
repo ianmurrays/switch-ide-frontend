@@ -3,6 +3,10 @@ module.exports = class ViewEditor extends Backbone.View
   id: 'view_editor'
   template: require './templates/view_editor'
 
+  # In order to update the preview more frequently, we have
+  # to store the last item that was hovered
+  lastHoveredDroppable = null
+
   events:
     # Render some elements useless
     "click a": "dummy"
@@ -19,25 +23,34 @@ module.exports = class ViewEditor extends Backbone.View
     $('.view-editor #view_container').width($(window).width() - $('#filebrowser').width() - $('#filebrowser').width() - 15)
 
     # Make components draggable
+    self = this
     @$('div.switch-component').draggable
       revert: "invalid"
-      revertDuration: 300
+      revertDuration: 100
       zIndex: 9999
       appendTo: "#center_container"
       helper: -> 
         $(".payload", this).html()
       opacity: 0.7
       cursor: "move"
-
-    # Make everything on the view droppable
-    @makeDroppable()
+      start: (event, ui) ->
+        only = $(this).data('component-drop-only')
+        self.makeDroppable(only)
+      drag: (event, ui) ->
+        return unless self.lastHoveredDroppable
+        self.putComponent(self, self.lastHoveredDroppable, {draggable: $(this), position: ui.position}, yes)
+      stop: ->
+        self.removeComponent()
 
     this
 
   show: -> @$el.fadeIn()
   hide: -> @$el.fadeOut()
 
-  makeDroppable: ->
+  # Makes elements on the view container droppable.
+  #
+  # only - a string of selectors that should be made droppable
+  makeDroppable: (only) ->
     self = this
 
     # Unbind all
@@ -45,11 +58,21 @@ module.exports = class ViewEditor extends Backbone.View
 
     # Bind all again
     exceptions = 'img, button, input, select, option, optgroup'
-    @$('#view_container, #view_container *').not(exceptions).droppable
+
+    if only
+      only = "#view_container #{only}"
+    else
+      only = "#view_container, #view_container *"
+
+    @$(only).not(exceptions).droppable
       hoverClass: "hovering"
       greedy: yes
-      drop: (e, u) -> self.putComponent(self, $(this), u, no)
-      over: (e, u) -> self.putComponent(self, $(this), u, yes)
+      drop: (e, u) -> 
+        self.putComponent(self, $(this), u, no)
+        self.lastHoveredDroppable = null
+      over: (e, u) ->
+        self.lastHoveredDroppable = $(this)
+        self.putComponent(self, $(this), u, yes)
       out: (e, u) -> self.removeComponent()
 
   removeComponent: -> $('#view_container .preview-component').remove()
@@ -62,9 +85,7 @@ module.exports = class ViewEditor extends Backbone.View
     type         = draggable.data('component-type')
     newComponent = $(payload)
     closest      = $.nearest({x: ui.position.left, y: ui.position.top}, droppable.children()).last()
-
-    console.log closest
-
+    
     if closest.length is 0
       droppable.append(newComponent)
     else

@@ -10,6 +10,7 @@
     Custom HTML code
   </div> -->
 
+  <!-- Button -->
   <div class="switch-component" data-component-type="button">
     <div class="payload">
       <button type="button" class="btn btn-primary">Button</button>
@@ -21,7 +22,8 @@
     <span class="name">Button</span>
   </div>
 
-  <div class="switch-component" data-component-type="button">
+  <!-- Button Group -->
+  <div class="switch-component" data-component-type="button-group">
     <div class="payload">
       <div class="btn-group">
         <button class="btn">Left</button>
@@ -34,6 +36,7 @@
     <span class="name">Button Group</span>
   </div>
 
+  <!-- Link -->
   <div class="switch-component" data-component-type="a">
     <div class="payload"><a href="javascript:;">Link</a></div>
     <div class="preview">
@@ -42,10 +45,50 @@
     <span class="name">Link</span>
   </div>
 
+  <!-- Plain Text Input -->
   <div class="switch-component">
+    <div class="payload"><input type="text"></div>
     <div class="preview">
       <input type="text" style="width: 30px;" placeholder="Text">
     </div>
     <span class="name">Input</span>
+  </div>
+
+  <!-- Control Group Text Input with Label -->
+  <div class="switch-component" data-component-type="label-button" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label for="new_input">Label</label></div>
+        <div class="controls"><input type="text" name="new_input" id="new_input"></div>
+      </div>
+    </div>
+
+    <div class="preview">
+      <input type="text" style="width: 30px;" placeholder="Text">
+    </div>
+    <span class="name">Input with Label</span>
+  </div>
+
+  <div class="switch-component">
+    <div class="payload">
+      <form class="form-horizontal">
+        <div class="control-group">
+          <div class="control-label"><label for="new_input">Label</label></div>
+          <div class="controls"><input type="text" name="new_input" id="new_input"></div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label"><label for="new_input2">Label 2</label></div>
+          <div class="controls"><input type="text" name="new_input2" id="new_input2"></div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form</span>
   </div>
 </div>
