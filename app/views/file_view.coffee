@@ -106,11 +106,14 @@ module.exports = class FileView extends Backbone.View
       app.code_editor.hide()
 
       if @model.isView()
+        # Load the view editor
         app.view_editor.setFile @model
         app.code_editor.updateAndSave()
         app.view_editor.show()
       else
+        # Load the code editor
         app.code_editor.setFile @model
+        app.view_editor.updateAndSave()
         app.code_editor.show()
       
       @model.fetchContent()

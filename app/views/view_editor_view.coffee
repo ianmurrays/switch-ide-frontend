@@ -1,11 +1,15 @@
+File = require 'models/file'
+
 module.exports = class ViewEditor extends Backbone.View
   className: 'view-editor'
   id: 'view_editor'
   template: require './templates/view_editor'
 
+  placeholderModel: yes
+
   # In order to update the preview more frequently, we have
   # to store the last item that was hovered
-  lastHoveredDroppable = null
+  lastHoveredDroppable: null
 
   events:
     # Render some elements useless
@@ -14,7 +18,20 @@ module.exports = class ViewEditor extends Backbone.View
     "click input[type=button]": "dummy"
 
   initialize: ->
+    @model ||= new File
+
     Backbone.Mediator.sub "view_editor:dropped_component", @makeDroppable, this
+
+    Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
+      e.preventDefault()
+
+      # Update the content and save
+      @updateAndSave()
+
+  updateAndSave: (callback) ->
+    return no if @placeholderModel
+    @model.set 'content', @$('#view_container').html()
+    @model.updateContent(callback)
 
   render: ->
     @$el.html @template(view: @model?.get('content'))
@@ -97,11 +114,21 @@ module.exports = class ViewEditor extends Backbone.View
     else
       Backbone.Mediator.pub "view_editor:dropped_component"
 
+  clear: ->
+    # Clears the view in case we load a different one.
+    @$('#view_container').html('')
+
+  # hideEditor: -> @$('#view_container').hide()
+  # showEditor: -> @$('#view_container').show()
+
   setFile: (file) ->
     @model?.off 'change:content', @render, this
+    @clear()
 
     @model = file
     @model.on 'change:content', @render, this
+
+    @placeholderModel = no
 
   # This makes links and buttons (and other elements in the views)
   # do nothing. It would be painful to accidentaly click links.
