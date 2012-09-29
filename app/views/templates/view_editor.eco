@@ -91,4 +91,70 @@
     <div class="preview"></div>
     <span class="name">Form</span>
   </div>
+
+  <div class="switch-component" data-component-type="button-dropdown">
+    <div class="payload">
+      <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          Action
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:;">Menu Item</a></li>
+          <li><a href="javascript:;">Menu Item</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Button Dropdown</span>
+  </div>
+
+  <div class="switch-component" data-component-type="button-dropdown-split">
+    <div class="payload">
+      <div class="btn-group">
+        <button class="btn">Action</button>
+        <button class="btn dropdown-toggle" data-toggle="dropdown">
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:;">Menu Item</a></li>
+          <li><a href="javascript:;">Menu Item</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Split Button Dropdown</span>
+  </div>
+
+  <div class="switch-component" data-component-type="tabs">
+    <div class="payload">
+      <ul class="nav nav-tabs">
+        <li class="active">
+          <a href="javascript:;">Tab 1</a>
+        </li>
+        <li><a href="javascript:;">Tab 2</a></li>
+        <li><a href="javascript:;">Tab 3</a></li>
+      </ul>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Tabs</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navlist">
+    <div class="payload">
+      <div class="well" style="padding: 8px 0;">
+        <ul class="nav nav-list">
+          <li class="nav-header">List header</li>
+          <li class="active"><a href="javascript:;">Home</a></li>
+          <li><a href="javascript:;">Library</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Nav List</span>
+  </div>
 </div>
