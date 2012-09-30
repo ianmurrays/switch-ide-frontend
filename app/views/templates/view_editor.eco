@@ -1,6 +1,18 @@
+<div id="view_editor_header">
+  <ul class="nav nav-tabs">
+    <li class="active pull-right view-editor-link">
+      <a href="javascript:;">View Editor</a>
+    </li>
+    <li class="pull-right html-editor-link"><a href="javascript:;">HTML Source</a></li>
+  </ul>
+</div>
+
+
 <div id="view_container">
   <%= @safe(@view) %>
 </div>
+
+<div id="code_container" style="display: none;"></div>
 
 <div id="component_sidebar" class="component-sidebar">
   <!-- <div class="switch-component">
@@ -9,6 +21,36 @@
     </div>
     Custom HTML code
   </div> -->
+
+  <div class="switch-component" data-component-type="grid-row">
+    <div class="payload">
+      <div class="row">
+        <div class="span6">&nbsp;</div>
+        <div class="span6">&nbsp;</div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Grid Row</span>
+  </div>  
+
+  <div class="switch-component" data-component-type="row">
+    <div class="payload">
+      <div class="row"></div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Row</span>
+  </div>
+
+  <div class="switch-component" data-component-type="span" data-component-drop-only="row">
+    <div class="payload">
+      <div class="span1"></div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Span</span>
+  </div>
 
   <!-- Button -->
   <div class="switch-component" data-component-type="button">
@@ -143,7 +185,7 @@
     <span class="name">Tabs</span>
   </div>
 
-  <div class="switch-component" data-component-type="navlist">
+  <div class="switch-component" data-component-type="navlist" data-min-width="300">
     <div class="payload">
       <div class="well" style="padding: 8px 0;">
         <ul class="nav nav-list">
@@ -156,5 +198,116 @@
 
     <div class="preview"></div>
     <span class="name">Nav List</span>
+  </div>
+
+  <div class="switch-component" data-component-type="hero-unit" data-min-width="300">
+    <div class="payload">
+      <div class="hero-unit">
+        <h1>Heading</h1>
+        <p>Tagline</p>
+        <p>
+          <a class="btn btn-primary btn-large">
+            Learn more
+          </a>
+        </p>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Hero Unit</span>
+  </div>
+
+  <div class="switch-component" data-component-type="page-header" data-min-width="400">
+    <div class="payload">
+      <div class="page-header">
+        <h1>Title <small>Subtext</small></h1>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Page Header</span>
+  </div>
+
+  <div class="switch-component" data-component-type="alert" data-min-width="400">
+    <div class="payload">
+      <div class="alert">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <strong>Warning!</strong> Best check yo self, you're not looking too good.
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Alert</span>
+  </div>
+
+  <div class="switch-component" data-component-type="alert-block" data-min-width="300">
+    <div class="payload">
+      <div class="alert alert-block">
+        <button type="button" class="close" data-dismiss="alert">×</button>
+        <h4>Warning!</h4>
+        Best check yo self, you're not...
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Alert Block</span>
+  </div>
+
+  <div class="switch-component" data-component-type="progress-bar">
+    <div class="payload">
+      <div class="progress">
+        <div class="bar" style="width: 60%;"></div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Progress Bar</span>
+  </div>
+
+  <div class="switch-component" data-component-type="well">
+    <div class="payload">
+      <div class="well">
+        Well
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Well</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navbar" data-min-width="300">
+    <div class="payload">
+      <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+          <a class="brand" href="#">Title</a>
+          <ul class="nav">
+            <li class="active"><a href="#">Home</a></li>
+            <li><a href="#">Link</a></li>
+            <li><a href="#">Link</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Navbar</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label">
+    <div class="payload">
+      <span class="label label-success">Label</span>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Label</span>
+  </div>
+
+  <div class="switch-component" data-component-type="badge">
+    <div class="payload">
+      <span class="badge badge-success">42</span>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Badge</span>
   </div>
 </div>

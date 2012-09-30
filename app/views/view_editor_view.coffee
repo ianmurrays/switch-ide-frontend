@@ -7,15 +7,22 @@ module.exports = class ViewEditor extends Backbone.View
 
   placeholderModel: yes
 
+  # Are we looking at the view or at the html?
+  activeView: "view"
+
   # In order to update the preview more frequently, we have
   # to store the last item that was hovered
   lastHoveredDroppable: null
 
   events:
     # Render some elements useless
-    "click a": "dummy"
-    "click button": "dummy"
-    "click input[type=button]": "dummy"
+    "click #view_container a": "dummy"
+    "click #view_container button": "dummy"
+    "click #view_container input[type=button]": "dummy"
+
+    # Normal actions
+    "click #view_editor_header .html-editor-link a": "showHtmlEditor"
+    "click #view_editor_header .view-editor-link a": "showViewEditor"
 
   initialize: ->
     @model ||= new File
@@ -30,14 +37,62 @@ module.exports = class ViewEditor extends Backbone.View
 
   updateAndSave: (callback) ->
     return no if @placeholderModel
-    @model.set 'content', @$('#view_container').html()
+    @model.set 'content', @getContent()
     @model.updateContent(callback)
+
+  # Cleans the code and returns the correct one depending on what
+  # the user is seeing at the moment.
+  getContent: ->
+    if @activeView is "html"
+      @codemirror.getValue()
+    else if @activeView is "view"
+      @unbindDroppables()
+      @$('#view_container').find('.ui-droppable').removeClass('ui-droppable')
+      style_html(@$('#view_container').html(), indent_size:2)
+
+  showHtmlEditor: ->
+    @codemirror.setValue @getContent()
+
+    @$('#code_container, #code_container .CodeMirror-scroll').height $(window).height() - 40 - 45
+
+    @$('#view_container').hide()
+    @$('#code_container').show()
+
+    @$('.view-editor-link').removeClass('active')
+    @$('.html-editor-link').addClass('active')
+
+    @codemirror.refresh()
+
+    @activeView = "html"
+
+  showViewEditor: ->
+    @$('#view_container').html @getContent()
+
+    $('.view-editor #view_container').height $(window).height() - 40 - 45
+
+    @$('#view_container').show()
+    @$('#code_container').hide()
+
+    @$('.view-editor-link').addClass('active')
+    @$('.html-editor-link').removeClass('active')
+
+    @activeView = "view"
 
   render: ->
     @$el.html @template(view: @model?.get('content'))
 
+    # Enable codemirror
+    @codemirror = CodeMirror @$('#code_container')[0], 
+      value: @model.get('content'), 
+      lineNumbers: true
+      onCursorActivity: => @codemirror.matchHighlight("CodeMirror-matchhighlight")
+      mode: {name: "xml", htmlMode: yes}
+
+    @$('#code_container textarea').addClass('mousetrap')
+
     # Resize it
-    $('.view-editor #view_container').width($(window).width() - $('#filebrowser').width() - $('#filebrowser').width() - 15)
+    $('.view-editor #view_container').width($(window).width() - $('#filebrowser').width() * 2 - 15)
+    $('.view-editor #view_editor_header').width($(window).width() - $('#filebrowser').width() * 2 - 15)
 
     # Make components draggable
     self = this
@@ -47,7 +102,10 @@ module.exports = class ViewEditor extends Backbone.View
       zIndex: 9999
       appendTo: "#center_container"
       helper: -> 
-        $(".payload", this).html()
+        $preview = $(".payload", this).clone()
+        $preview.children().first().css('min-width', $(this).data('min-width')) if $(this).data('min-width')
+
+        $preview.html()
       opacity: 0.7
       cursor: "move"
       start: (event, ui) ->
@@ -59,10 +117,15 @@ module.exports = class ViewEditor extends Backbone.View
       stop: ->
         self.removeComponent()
 
+    if @activeView is "html"
+      @showHtmlEditor()
+
     this
 
   show: -> @$el.fadeIn()
   hide: -> @$el.fadeOut()
+
+  unbindDroppables: -> @$('#view_container, #view_container *').droppable("destroy")
 
   # Makes elements on the view container droppable.
   #
@@ -71,7 +134,7 @@ module.exports = class ViewEditor extends Backbone.View
     self = this
 
     # Unbind all
-    @$('#view_container, #view_container *').droppable("destroy")
+    @unbindDroppables()
 
     # Bind all again
     exceptions = 'img, button, input, select, option, optgroup'

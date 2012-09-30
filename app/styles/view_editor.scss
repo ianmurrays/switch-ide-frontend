@@ -10,8 +10,21 @@
     border: 2px dashed yellow;
   }
 
+  #view_editor_header {
+    height: 40px;
+    position: fixed;
+    top: 45px; 
+    left: $filebrowser_width + 5px;
+  }
+
   #view_container {
     min-height: 50px;
+    margin-top: 45px;
+    overflow-y: auto;
+  }
+
+  #code_container {
+    margin-top: 45px;
   }
 
   #component_sidebar {

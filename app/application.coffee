@@ -77,6 +77,11 @@ module.exports = class Application
     $('.view-editor').height $(window).height() - 40 # 40 is the size of the navbar
     $('.view-editor').width view_editor_width
     $('.view-editor #view_container').width view_editor_width - filebrowser_width - 15
+    $('.view-editor #view_container').height $(window).height() - 40 - 45
+    $('.view-editor #view_editor_header').width view_editor_width - filebrowser_width - 5
     $('.view-editor').css('top', 45)
+    
+    # Sizes                                                                                               Navbar --v    v-- Tabbar
+    $('.view-editor #code_container, .view-editor #code_container .CodeMirror-scroll').height $(window).height() - 40 - 45
 
 window.app = new Application
