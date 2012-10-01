@@ -14,6 +14,16 @@ module.exports = class ViewEditor extends Backbone.View
   # to store the last item that was hovered
   lastHoveredDroppable: null
 
+  # With this we create a "threshold" to avoid triggering the 
+  # drag event all the time
+  dragThreshold: 30.0 # 30 pixels of distance
+  lastDragPosition:
+    x: 0
+    y: 0
+
+  # Alternating between insertBefore and insertAfter
+  alternateBeforeAfter: true
+
   events:
     # Render some elements useless
     "click #view_container a": "dummy"
@@ -35,6 +45,14 @@ module.exports = class ViewEditor extends Backbone.View
       # Update the content and save
       @updateAndSave()
 
+    Mousetrap.bind ['ctrl+alt+up', 'command+option+up', 'ctrl+alt+down', 'command+option+down'], (e) =>
+      e.preventDefault()
+
+      if @activeView is 'html'
+        @showViewEditor()
+      else if @activeView is 'view'
+        @showHtmlEditor()
+
   updateAndSave: (callback) ->
     return no if @placeholderModel
     @model.set 'content', @getContent()
@@ -48,7 +66,16 @@ module.exports = class ViewEditor extends Backbone.View
     else if @activeView is "view"
       @unbindDroppables()
       @$('#view_container').find('.ui-droppable').removeClass('ui-droppable')
-      style_html(@$('#view_container').html(), indent_size:2)
+
+      html = style_html(@$('#view_container').html(), indent_size:2)
+
+      console.log html
+
+      html = html.replace /\s?class=""/g, ""
+
+      console.log html
+
+      html
 
   showHtmlEditor: ->
     @codemirror.setValue @getContent()
@@ -62,6 +89,7 @@ module.exports = class ViewEditor extends Backbone.View
     @$('.html-editor-link').addClass('active')
 
     @codemirror.refresh()
+    @codemirror.focus()
 
     @activeView = "html"
 
@@ -85,6 +113,7 @@ module.exports = class ViewEditor extends Backbone.View
     @codemirror = CodeMirror @$('#code_container')[0], 
       value: @model.get('content'), 
       lineNumbers: true
+      tabSize: 2
       onCursorActivity: => @codemirror.matchHighlight("CodeMirror-matchhighlight")
       mode: {name: "xml", htmlMode: yes}
 
@@ -102,8 +131,15 @@ module.exports = class ViewEditor extends Backbone.View
       zIndex: 9999
       appendTo: "#center_container"
       helper: -> 
-        $preview = $(".payload", this).clone()
+        if $(this).data('preview')
+          $preview = $('.drag-preview', this).clone()
+        else
+          $preview = $('.payload', this).clone()
+
+        # Set min and max widths if applicable
         $preview.children().first().css('min-width', $(this).data('min-width')) if $(this).data('min-width')
+        $preview.children().first().css('max-width', $(this).data('max-width')) if $(this).data('max-width')
+        $preview.children().first().css('width', $(this).data('width')) if $(this).data('width')
 
         $preview.html()
       opacity: 0.7
@@ -113,9 +149,18 @@ module.exports = class ViewEditor extends Backbone.View
         self.makeDroppable(only)
       drag: (event, ui) ->
         return unless self.lastHoveredDroppable
+
+        # Calculate the distance from the last point
+        distance = Math.sqrt(Math.pow(ui.position.left - self.lastDragPosition.x, 2) + Math.pow(ui.position.top - self.lastDragPosition.y, 2))
+        return unless distance > self.dragThreshold
+        self.lastDragPosition = 
+          x: ui.position.left
+          y: ui.position.top
+
         self.putComponent(self, self.lastHoveredDroppable, {draggable: $(this), position: ui.position}, yes)
       stop: ->
         self.removeComponent()
+        self.unbindDroppables()
 
     if @activeView is "html"
       @showHtmlEditor()
@@ -169,7 +214,18 @@ module.exports = class ViewEditor extends Backbone.View
     if closest.length is 0
       droppable.append(newComponent)
     else
-      newComponent.insertAfter(closest)
+      if over
+        if self.alternateBeforeAfter
+          newComponent.insertBefore(closest)
+        else
+          newComponent.insertAfter(closest)
+      else
+        unless self.alternateBeforeAfter
+          newComponent.insertBefore(closest)
+        else
+          newComponent.insertAfter(closest)
+
+      self.alternateBeforeAfter = ! self.alternateBeforeAfter
 
     if over
       newComponent.css(opacity:0.7)
@@ -180,6 +236,7 @@ module.exports = class ViewEditor extends Backbone.View
   clear: ->
     # Clears the view in case we load a different one.
     @$('#view_container').html('')
+    @codemirror.setValue ''
 
   # hideEditor: -> @$('#view_container').hide()
   # showEditor: -> @$('#view_container').show()

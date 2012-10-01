@@ -52,6 +52,57 @@
     <span class="name">Span</span>
   </div>
 
+  <!-- Tables -->
+  <div class="switch-component" data-component-type="table" data-width="400">
+    <div class="payload">
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>First Column</th>
+            <th>Second Column</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>First Row</td>
+            <td>First Row</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Table</span>
+  </div>
+
+  <div class="switch-component" data-component-type="table-row" data-component-drop-only="tbody" data-preview="true">
+    <div class="payload">
+      <tr>
+        <td>Cell</td>
+      </tr>
+    </div>
+
+    <div class="drag-preview">
+      <table class="table table-bordered" style="width: 200px"><tbody><tr><td>Row</td></tr></tbody></table>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Table Row</span>
+  </div>
+
+  <div class="switch-component" data-component-type="table-cell" data-component-drop-only="tr" data-preview="true">
+    <div class="payload">
+      <td>Cell</td>
+    </div>
+
+    <div class="drag-preview">
+      <table class="table table-bordered" style="width: 200px"><tbody><tr><td>Cell</td></tr></tbody></table>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Table Cell</span>
+  </div>
+
   <!-- Button -->
   <div class="switch-component" data-component-type="button">
     <div class="payload">
@@ -62,6 +113,23 @@
       <button class="btn btn-primary btn-small">Button</button>
     </div>
     <span class="name">Button</span>
+  </div>
+
+  <div class="switch-component" data-component-type="button-toolbar">
+    <div class="payload">
+      <div class="btn-toolbar">
+        <button class="btn">Button</button>
+
+        <div class="btn-group">
+          <button class="btn">Left</button>
+          <button class="btn">Middle</button>
+          <button class="btn">Right</button>
+        </div>  
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Button Toolbar</span>
   </div>
 
   <!-- Button Group -->
@@ -96,21 +164,6 @@
     <span class="name">Input</span>
   </div>
 
-  <!-- Control Group Text Input with Label -->
-  <div class="switch-component" data-component-type="label-button" data-component-drop-only="form">
-    <div class="payload">
-      <div class="control-group">
-        <div class="control-label"><label for="new_input">Label</label></div>
-        <div class="controls"><input type="text" name="new_input" id="new_input"></div>
-      </div>
-    </div>
-
-    <div class="preview">
-      <input type="text" style="width: 30px;" placeholder="Text">
-    </div>
-    <span class="name">Input with Label</span>
-  </div>
-
   <div class="switch-component">
     <div class="payload">
       <form class="form-horizontal">
@@ -132,6 +185,203 @@
 
     <div class="preview"></div>
     <span class="name">Form</span>
+  </div>
+
+  <!-- Control Group Text Input with Label -->
+  <div class="switch-component" data-component-type="label-button" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label for="new_input">Label</label></div>
+        <div class="controls"><input type="text" name="new_input" id="new_input"></div>
+      </div>
+    </div>
+
+    <div class="preview">
+      <input type="text" style="width: 30px;" placeholder="Text">
+    </div>
+    <span class="name">Form Input</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-checkbox-group" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label>Checkbox</label></div>
+        <div class="controls">
+          <label class="checkbox">
+            <input type="checkbox" value="">
+            Checkbox
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Checkbox Group</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-checkbox-single" data-component-drop-only=".controls">
+    <div class="payload">
+      <label class="checkbox">
+        <input type="checkbox" value="">
+        Checkbox
+      </label>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Checkbox (single)</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-radio-group" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label>Radio</label></div>
+        <div class="controls">
+          <label class="radio">
+            <input type="radio" name="optionsRadios" id="optionsRadios1" value="option1" checked>
+            Radio 1
+          </label>
+          <label class="radio">
+            <input type="radio" name="optionsRadios" id="optionsRadios2" value="option2">
+            Radio 2
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Radio Group</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-radio-single" data-component-drop-only=".controls">
+    <div class="payload">
+      <label class="radio">
+        <input type="radio" name="optionsRadios" value="option1">
+        Radio
+      </label>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Radio (single)</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-checkbox-inline-group" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label>Inline Checkboxes</label></div>
+        <div class="controls">
+          <label class="checkbox inline">
+            <input type="checkbox" id="inlineCheckbox1" value="option1"> 1
+          </label>
+          <label class="checkbox inline">
+            <input type="checkbox" id="inlineCheckbox2" value="option2"> 2
+          </label>
+          <label class="checkbox inline">
+            <input type="checkbox" id="inlineCheckbox3" value="option3"> 3
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Inline Checkboxes</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-checkbox-inline-single" data-component-drop-only=".controls">
+    <div class="payload">
+      <label class="checkbox inline">
+        <input type="checkbox" id="inlineCheckbox3" value="option3"> 1
+      </label>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Inline Checkbox (single)</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-select" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label for="select">Select</label></div>
+        <div class="controls">
+          <select id="select" name="select">
+            <optgroup>Options Group</optgroup>
+            <option value="">Option 1</option>
+            <option value="">Option 2</option>
+            <option value="">Option 3</option>
+            <optgroup>Options Group</optgroup>
+            <option value="">Option 1</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Select</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-prepended-input" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label for="prependedInput">Prepend</label></div>
+        <div class="controls">
+          <div class="input-prepend">
+            <span class="add-on">@</span><input class="span2" id="prependedInput" size="16" type="text" placeholder="Username">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Prepended Input</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-appended-input" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label for="appendedInput">Append</label></div>
+        <div class="controls">
+          <div class="input-append">
+            <input class="span2" id="appendedInput" size="16" type="text"><span class="add-on">.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Appended Input</span>
+  </div>
+
+  <div class="switch-component" data-component-type="label-combined-input" data-component-drop-only="form">
+    <div class="payload">
+      <div class="control-group">
+        <div class="control-label"><label for="appendedInput">Append</label></div>
+        <div class="controls">
+          <div class="input-prepend input-append">
+            <span class="add-on">$</span><input class="span2" id="appendedInput" size="16" type="text"><span class="add-on">.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Combined Input</span>
+  </div>
+
+  <div class="switch-component" data-component-type="form-inline-help" data-component-drop-only=".controls">
+    <div class="payload">
+      <span class="help-inline">Inline Help</span>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Inline Help</span>
+  </div>
+
+  <div class="switch-component" data-component-type="form-block-help" data-component-drop-only=".controls">
+    <div class="payload">
+      <span class="help-block">Block Help</span>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Form Block Help</span>
   </div>
 
   <div class="switch-component" data-component-type="button-dropdown">
