@@ -9,12 +9,6 @@ module.exports = class CodeEditorView extends Backbone.View
   initialize: ->
     @model ||= new File
 
-    Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
-      e.preventDefault()
-
-      # Update the content and save
-      @updateAndSave()
-
     Mousetrap.bind ['ctrl+z', 'command+z'], (e) => 
       e.preventDefault() # Let us handle this okay?
 
@@ -73,6 +67,8 @@ module.exports = class CodeEditorView extends Backbone.View
     if history = localStorage["switch:codemirror:history:#{app.project.get('id')}:#{@model.fullPath()}"]
       @codemirror.setHistory JSON.parse(history)
 
+    @codemirror.focus()
+
   render: ->
     @$el.html ""
     @codemirror = CodeMirror @$el[0], 
@@ -84,5 +80,15 @@ module.exports = class CodeEditorView extends Backbone.View
     @$('textarea').addClass "mousetrap"
     this
 
-  show: -> @$el.show()
-  hide: -> @$el.hide()
+  show: -> 
+    @$el.show()
+
+    Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
+      e.preventDefault()
+
+      # Update the content and save
+      @updateAndSave()
+
+  hide: -> 
+    @$el.hide()
+    Mousetrap.unbind ['ctrl+s', 'command+s']

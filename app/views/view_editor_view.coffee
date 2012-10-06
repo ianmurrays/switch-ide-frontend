@@ -41,11 +41,7 @@ module.exports = class ViewEditor extends Backbone.View
   initialize: ->
     @model ||= new File
 
-    Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
-      e.preventDefault()
-
-      # Update the content and save
-      @updateAndSave()
+    # Binding of the CMD+S key combination happens when showing!
 
     Mousetrap.bind ['ctrl+alt+up', 'command+option+up', 'ctrl+alt+down', 'command+option+down'], (e) =>
       e.preventDefault()
@@ -209,8 +205,19 @@ module.exports = class ViewEditor extends Backbone.View
 
     this
 
-  show: -> @$el.show()
-  hide: -> @$el.hide()
+  show: -> 
+    @$el.show()
+
+    Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
+      e.preventDefault()
+
+      # Update the content and save
+      @updateAndSave()
+
+  hide: -> 
+    @$el.hide()
+    
+    Mousetrap.unbind ['ctrl+s', 'command+s']
 
   unbindDroppables: -> @$('#view_container, #view_container *').droppable("destroy")
 
