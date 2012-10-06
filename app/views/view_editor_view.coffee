@@ -41,8 +41,6 @@ module.exports = class ViewEditor extends Backbone.View
   initialize: ->
     @model ||= new File
 
-    Backbone.Mediator.sub "view_editor:dropped_component", @makeDroppable, this
-
     Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
       e.preventDefault()
 
@@ -74,6 +72,25 @@ module.exports = class ViewEditor extends Backbone.View
       # @putComponent(this, @lastHoveredDroppable, {draggable: @draggable, position: @lastDragPosition}, yes)
     , 'keyup'
 
+    # Undo/Redo
+    Mousetrap.bind ['ctrl+z', 'command+z'], (e) => 
+      e.preventDefault() # Let us handle this okay?
+
+      # Undo the change on the code editor
+      @codemirror.undo()
+
+      # Reflect the change on the view editor if it corresponds
+      @loadViewEditor(@codemirror.getValue()) if @activeView is "view"
+
+    Mousetrap.bind ['ctrl+shift+z', 'command+shift+z'], (e) =>
+      e.preventDefault()
+
+      # Redo the change on the code editor
+      @codemirror.redo()
+
+      # Reflect the change on the view editor if it corresponds
+      @loadViewEditor(@codemirror.getValue()) if @activeView is "view"
+
   updateAndSave: (callback) ->
     return no if @placeholderModel
     @model.set 'content', @getContent()
@@ -96,8 +113,11 @@ module.exports = class ViewEditor extends Backbone.View
 
       html
 
-  showHtmlEditor: ->
-    @codemirror.setValue @getContent()
+  showHtmlEditor: (e) -> @loadHtmlEditor()
+  showViewEditor: (e) -> @loadViewEditor()
+
+  loadHtmlEditor: (content = null) ->
+    @codemirror.setValue(content || @getContent())
 
     @$('#code_container, #code_container .CodeMirror-scroll').height $(window).height() - 40 - 45
     @$('#code_container').width $(window).width() - $('#filebrowser').width() * 2 - 5
@@ -113,8 +133,8 @@ module.exports = class ViewEditor extends Backbone.View
 
     @activeView = "html"
 
-  showViewEditor: ->
-    @$('#view_container').html @getContent()
+  loadViewEditor: (content = null) ->
+    @$('#view_container').html(content || @getContent())
 
     $('.view-editor #view_container').height $(window).height() - 40 - 45
 
@@ -246,7 +266,8 @@ module.exports = class ViewEditor extends Backbone.View
       newComponent.css(opacity:0.7)
       newComponent.addClass("preview-component")
     else
-      Backbone.Mediator.pub "view_editor:dropped_component"
+      # Update codemirror's code
+      @codemirror.setValue self.getContent()
 
   clear: ->
     # Clears the view in case we load a different one.
