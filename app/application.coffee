@@ -83,5 +83,6 @@ module.exports = class Application
     
     # Sizes                                                                                               Navbar --v    v-- Tabbar
     $('.view-editor #code_container, .view-editor #code_container .CodeMirror-scroll').height $(window).height() - 40 - 45
+    $('.view-editor #code_container').width $(window).width() - filebrowser_width * 2 - 5
 
 window.app = new Application

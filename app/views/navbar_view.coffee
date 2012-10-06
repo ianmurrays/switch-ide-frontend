@@ -125,7 +125,10 @@ module.exports = class NavbarView extends Backbone.View
   setProgress: (progress) -> @$('.progress .bar').css('width', progress)
 
   render: ->
-    @$el.html @template(helper: @helpers)
+    @$el.html @template.render
+      divider: @helpers.divider
+      menuItem: @helpers.menuItem
+    
     this
 
   buildProject: ->

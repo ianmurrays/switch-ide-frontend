@@ -49,7 +49,7 @@ module.exports = class CodeEditorView extends Backbone.View
     @codemirror.setOption "mode", @model.codeMode()
 
   render: ->
-    @$el.html @template
+    @$el.html ""
     @codemirror = CodeMirror @$el[0], 
       value: @model.get('content'), 
       lineNumbers: true

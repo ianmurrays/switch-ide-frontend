@@ -10,7 +10,10 @@ module.exports = class ProjectsView extends Backbone.View
     @collection.on 'all', @render, this
 
   render: ->
-    @$el.html @template(collection: @collection.toArray())
+    @projects = @collection.map (project) ->
+      {id: project.get('id'), name: project.get('name')}
+
+    @$el.html @template.render(projects: @projects)
     this
 
   destroy: ->

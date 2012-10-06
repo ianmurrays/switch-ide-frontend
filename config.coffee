@@ -22,6 +22,6 @@ exports.config =
         before: ['vendor/styles/normalize.css']
         after: ['vendor/styles/helpers.css']
     templates:
-      defaultExtension: 'eco'
+      defaultExtension: 'mustache'
       joinTo: 'javascripts/app.js'
   minify: no

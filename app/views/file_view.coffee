@@ -38,7 +38,16 @@ module.exports = class FileView extends Backbone.View
       Backbone.Mediator.pub "fileview:startedRenaming", this if renaming
 
   render: ->
-    @$el.html @template(file: @model, directory: @directory, allowClose: @allowClose)
+    @$el.html @template.render
+      name: @model.get('name')
+      cid: @model.cid
+      isDirectory: @model.isDirectory()
+      isRenaming: @model.get('isRenaming')
+      isView: @model.isView()
+      directory: @directory
+      allowClose: @allowClose
+      showForm: @model.get('isRenaming') and not @allowClose
+
     @$el.attr('data-cid', @model.cid) # For the sortability
 
     if @directory

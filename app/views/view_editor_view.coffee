@@ -62,18 +62,24 @@ module.exports = class ViewEditor extends Backbone.View
   # the user is seeing at the moment.
   getContent: ->
     if @activeView is "html"
-      @codemirror.getValue()
+      html = @codemirror.getValue()
+
+      # Comment ECO
+      html = html.replace /(<%=?.*%>)/g, "<!--sw[$1]sw-->"
+
+      html
+
     else if @activeView is "view"
       @unbindDroppables()
       @$('#view_container').find('.ui-droppable').removeClass('ui-droppable')
 
-      html = style_html(@$('#view_container').html(), indent_size:2)
+      html = @$('#view_container').html()
 
-      console.log html
-
+      # Uncomment ECO
+      html = html.replace /<!--sw\[(.*)\]sw-->/g, "$1"
+      
+      html = style_html(html, indent_size:2)
       html = html.replace /\s?class=""/g, ""
-
-      console.log html
 
       html
 
@@ -81,6 +87,7 @@ module.exports = class ViewEditor extends Backbone.View
     @codemirror.setValue @getContent()
 
     @$('#code_container, #code_container .CodeMirror-scroll').height $(window).height() - 40 - 45
+    @$('#code_container').width $(window).width() - $('#filebrowser').width() * 2 - 5
 
     @$('#view_container').hide()
     @$('#code_container').show()
@@ -107,7 +114,7 @@ module.exports = class ViewEditor extends Backbone.View
     @activeView = "view"
 
   render: ->
-    @$el.html @template(view: @model?.get('content'))
+    @$el.html @template.render(view: @model?.get('content'))
 
     # Enable codemirror
     @codemirror = CodeMirror @$('#code_container')[0], 

@@ -1,0 +1,169 @@
+<div class="navbar-inner">
+  <div class="container-fluid">
+    <a class="brand" href="javascript:;"><strong>Switch IDE</strong></a>
+
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-file"></i>
+          File
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="javascript:;">
+              <i class="icon-plus"></i>
+              New Project
+              <div class="pull-right keyboard-shortcut">⌘⇧N</div>
+            </a>
+          </li>
+
+          <li>
+            <a href="javascript:;">
+              <i class="icon-blank"></i>
+              New File
+              <div class="pull-right keyboard-shortcut">⌘N</div>
+            </a>
+          </li>
+
+          <li>
+            <a href="javascript:;">
+              <i class="icon-upload"></i>
+              Add Files
+            </a>
+          </li>
+
+          <li>
+            <a href="javascript:;">
+              <i class="icon-save"></i>
+              Save
+              <div class="pull-right keyboard-shortcut">⌘S</div>
+            </a>
+          </li>
+
+          <li>
+            <a href="javascript:;">
+              <i class="icon-fire"></i>
+              Quick Open
+              <div class="pull-right keyboard-shortcut">⌘T</div>
+            </a>
+          </li>
+
+          <li class="divider"></li>
+
+          <li>
+            <a href="javascript:;">
+              <i class="icon-remove"></i>
+              Close Project
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="javascript:;" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-briefcase"></i>
+          Project
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <!-- {{{menuItem 'Build & Run', 'javascript:;', icon: 'legal', shortcut: '⌘R', menu_id: 'build-run'}}}
+          {{{menuItem 'Build', 'javascript:;', shortcut: '⌘B', menu_id: 'build'}}}
+          {{{menuItem 'Run', 'javascript:;', icon: 'play', menu_id: 'run'}}}
+          {{{menuItem 'Test', 'javascript:;', icon: 'wrench', shortcut: '⌘⇧T'}}}
+          {{{menuItem 'Archive', 'javascript:;', icon: 'save'}}} -->
+        </ul>
+      </li>
+    </ul>
+
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-github"></i>
+          Git
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <!-- {{{menuItem 'Create Repo', 'javascript:;'}}}
+          {{{menuItem 'Commit', 'javascript:;', icon: 'ok', shortcut: '⌘⌥C'}}}
+          {{{menuItem 'Push', 'javascript:;', icon: 'upload-alt', shortcut: '⌘⌥P'}}}
+          {{{menuItem 'Pull', 'javascript:;', icon: 'download-alt', shortcut: '⌘⌥X'}}}
+          <li class="divider"></li>
+          {{{menuItem 'Switch Branch', 'javascript:;', icon: 'random'}}}
+          {{{menuItem 'Merge', 'javascript:;'}}}
+          {{{menuItem 'Tag', 'javascript:;', icon: 'tag'}}} -->
+        </ul>
+      </li>
+    </ul>
+
+    <ul class="nav">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          <i class="icon-th-large"></i>
+          Window
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li>
+            <a href="javascript:;">
+              <i class="icon-blank"></i>
+              Close
+              <div class="pull-right keyboard-shortcut">^W</div>
+            </a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+
+    <div class="btn-group pull-right">
+      <a class="btn btn-success" data-menu_id="build-run">
+        <i class="icon-legal"></i>
+        Build & Run
+      </a>
+      <a class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+        <span class="caret"></span>
+      </a>
+      <ul class="dropdown-menu">
+        <li>
+          <a href="javascript:;" data-menu_id="build">
+            <i class="icon-blank"></i>
+            Build
+            <div class="pull-right keyboard-shortcut">⌘B</div>
+          </a>
+        </li>
+
+        <li>
+          <a href="javascript:;" data-menu_id="run">
+            <i class="icon-play"></i>
+            Run
+          </a>
+        </li>
+
+        <li>
+          <a href="javascript:;">
+            <i class="icon-wrench"></i>
+            Test
+            <div class="pull-right keyboard-shortcut">⌘⇧T</div>
+          </a>
+        </li>
+
+        <li>
+          <a href="javascript:;">
+            <i class="icon-save"></i>
+            Archive
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <div class="progress progress-striped active pull-right" style="display: none;">
+      <div class="bar" style="width: 100%;"></div>
+    </div>
+
+    <div class="pull-right">
+      <p class="switch-status" style="position: relative">Ready</p>
+    </div>
+  </div>
+</div>

@@ -19,7 +19,7 @@
     "coffee-script-brunch": ">= 1.0 < 1.4",
     "css-brunch": ">= 1.0 < 1.4",
     "sass-brunch": ">= 1.0 < 1.4",
-    "eco-brunch": ">= 1.0 < 1.4",
+    "hoganjs-brunch": ">= 1.1",
     "uglify-js-brunch": ">= 1.0 < 1.4",
     "clean-css-brunch": ">= 1.0 < 1.4"
   },

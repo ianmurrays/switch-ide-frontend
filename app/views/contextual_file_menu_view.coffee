@@ -29,7 +29,7 @@ module.exports = class ContextualFileMenuView extends Backbone.View
   hide: -> @$el.hide()
 
   render: ->
-    @$el.html @template(allowClose:@fileView?.allowClose)
+    @$el.html @template.render(allowClose:@fileView?.allowClose)
         
   rename: ->
     @hide()

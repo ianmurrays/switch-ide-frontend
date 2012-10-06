@@ -1,0 +1,30 @@
+<div class="file-item">
+  <a href="javascript:;" id="cid_{{cid}}">
+    {{#isDirectory}}
+      {{#directory}}
+        <i class="icon-folder-open"></i>
+      {{/directory}}
+      {{^directory}}
+        <i class="icon-folder-close"></i>
+      {{/directory}}
+    {{/isDirectory}}
+
+    {{^isDirectory}}
+      {{#isView}}
+        <i class="icon-eye-open"></i> 
+      {{/isView}}
+      {{^isView}}
+        <i class="icon-file"></i> 
+      {{/isView}}
+    {{/isDirectory}}
+
+    {{#showForm}}
+      <input type="text" value="{{name}}" class="input-medium rename-field">
+    {{/showForm}}
+    {{^showForm}}
+      {{name}}
+    {{/showForm}}
+  </a>
+</div>
+
+<div class="subdirectory file-item"></div>

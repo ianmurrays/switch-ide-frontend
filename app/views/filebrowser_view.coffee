@@ -43,7 +43,7 @@ module.exports = class FilebrowserView extends Backbone.View
 
   render: ->
     app.logger.log "FilebrowserView#render"
-    @$el.html @template
+    @$el.html @template.render()
 
     @$('#open_files').sortable
       axis: "y"
