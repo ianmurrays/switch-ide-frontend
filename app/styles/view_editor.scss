@@ -6,6 +6,24 @@
   width: 100%;
   left: $filebrowser_width + 5px;
 
+  .CodeMirror {
+    width: 100%;
+    font-family: 'Monaco', 'Courier New';
+    font-size: 12px;
+    line-height: 18px;
+
+    .CodeMirror-scroll {
+      height: 500px; // To be resized with JS
+      overflow: auto;
+    }
+
+    .CodeMirror-matchhighlight {
+      border: 1px solid gray;
+      background: whitesmoke;
+      border-radius: 3px;
+    }
+  }
+
   .hovering {
     border: 2px dashed yellow;
   }

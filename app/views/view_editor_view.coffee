@@ -14,6 +14,10 @@ module.exports = class ViewEditor extends Backbone.View
   # to store the last item that was hovered
   lastHoveredDroppable: null
 
+  # Used when we hold shift, we need to call putComponent again 
+  # with this
+  draggable: null
+
   # With this we create a "threshold" to avoid triggering the 
   # drag event all the time
   dragThreshold: 30.0 # 30 pixels of distance
@@ -21,8 +25,8 @@ module.exports = class ViewEditor extends Backbone.View
     x: 0
     y: 0
 
-  # Alternating between insertBefore and insertAfter
-  alternateBeforeAfter: true
+  # Hold shift to insertBefore
+  insertBefore: no
 
   events:
     # Render some elements useless
@@ -53,6 +57,23 @@ module.exports = class ViewEditor extends Backbone.View
       else if @activeView is 'view'
         @showHtmlEditor()
 
+    # This let's us change between inserting before or after when dragging
+    Mousetrap.bind ['shift'], (e) =>
+      @insertBefore = yes
+
+      # # Update the preview
+      # return unless @lastHoveredDroppable and @lastDragPosition and @draggable
+      # @putComponent(this, @lastHoveredDroppable, {draggable: @draggable, position: @lastDragPosition}, yes)
+    , 'keydown'
+
+    Mousetrap.bind ['shift'], (e) => 
+      @insertBefore = no
+
+      # # Update the preview
+      # return unless @lastHoveredDroppable and @lastDragPosition and @draggable
+      # @putComponent(this, @lastHoveredDroppable, {draggable: @draggable, position: @lastDragPosition}, yes)
+    , 'keyup'
+
   updateAndSave: (callback) ->
     return no if @placeholderModel
     @model.set 'content', @getContent()
@@ -63,10 +84,6 @@ module.exports = class ViewEditor extends Backbone.View
   getContent: ->
     if @activeView is "html"
       html = @codemirror.getValue()
-
-      # Comment ECO
-      html = html.replace /(<%=?.*%>)/g, "<!--sw[$1]sw-->"
-
       html
 
     else if @activeView is "view"
@@ -74,10 +91,6 @@ module.exports = class ViewEditor extends Backbone.View
       @$('#view_container').find('.ui-droppable').removeClass('ui-droppable')
 
       html = @$('#view_container').html()
-
-      # Uncomment ECO
-      html = html.replace /<!--sw\[(.*)\]sw-->/g, "$1"
-      
       html = style_html(html, indent_size:2)
       html = html.replace /\s?class=""/g, ""
 
@@ -154,6 +167,7 @@ module.exports = class ViewEditor extends Backbone.View
       start: (event, ui) ->
         only = $(this).data('component-drop-only')
         self.makeDroppable(only)
+        self.draggable = $(this)
       drag: (event, ui) ->
         return unless self.lastHoveredDroppable
 
@@ -168,6 +182,7 @@ module.exports = class ViewEditor extends Backbone.View
       stop: ->
         self.removeComponent()
         self.unbindDroppables()
+        self.draggable = null
 
     if @activeView is "html"
       @showHtmlEditor()
@@ -217,22 +232,15 @@ module.exports = class ViewEditor extends Backbone.View
     type         = draggable.data('component-type')
     newComponent = $(payload)
     closest      = $.nearest({x: ui.position.left, y: ui.position.top}, droppable.children()).last()
-    
+
+    # Hold shift to insertBefore!
     if closest.length is 0
       droppable.append(newComponent)
     else
-      if over
-        if self.alternateBeforeAfter
-          newComponent.insertBefore(closest)
-        else
-          newComponent.insertAfter(closest)
+      if self.insertBefore
+        newComponent.insertBefore(closest)
       else
-        unless self.alternateBeforeAfter
-          newComponent.insertBefore(closest)
-        else
-          newComponent.insertAfter(closest)
-
-      self.alternateBeforeAfter = ! self.alternateBeforeAfter
+        newComponent.insertAfter(closest)
 
     if over
       newComponent.css(opacity:0.7)
