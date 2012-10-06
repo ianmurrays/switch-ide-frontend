@@ -2,7 +2,7 @@ Model = require './model'
 
 module.exports = class File extends Model
   isDirectory: -> @get('type') == 'directory'
-  isView: -> @get('name').match /\.eco$/
+  isView: -> @get('name').match /\.mustache$/
 
   # Returns the code editor mode to run
   codeMode: ->
@@ -19,8 +19,8 @@ module.exports = class File extends Model
         "markdown"
       else if @get('name').match /\.html?$/
         {name: "xml", htmlMode: yes}
-      else if @get('name').match /\.eco$/
-        "eco"
+      else if @get('name').match /\.mustache$/
+        {name: "xml", htmlMode: yes}
     else
       "text"
 
