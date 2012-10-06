@@ -56,7 +56,7 @@ module.exports = class Application
     # View Editor
     @view_editor = new ViewEditor()
     $('#center_container').append @view_editor.render().el
-    # @view_editor.hide()
+    @view_editor.hide()
 
     @resizeComponents()
 
