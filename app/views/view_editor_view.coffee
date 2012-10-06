@@ -5,6 +5,9 @@ module.exports = class ViewEditor extends Backbone.View
   id: 'view_editor'
   template: require './templates/view_editor'
 
+  # Is this the current editor? Assume no
+  active: no
+
   placeholderModel: yes
 
   # Are we looking at the view or at the html?
@@ -208,6 +211,8 @@ module.exports = class ViewEditor extends Backbone.View
   show: -> 
     @$el.show()
 
+    @active = yes
+
     Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
       e.preventDefault()
 
@@ -216,6 +221,8 @@ module.exports = class ViewEditor extends Backbone.View
 
   hide: -> 
     @$el.hide()
+
+    @active = no
     
     Mousetrap.unbind ['ctrl+s', 'command+s']
 

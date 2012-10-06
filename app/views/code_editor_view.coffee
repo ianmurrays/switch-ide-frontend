@@ -4,6 +4,9 @@ module.exports = class CodeEditorView extends Backbone.View
   # template: require './templates/code_editor'
   className: 'code-editor'
 
+  # Is this the current editor? Assume no.
+  active: no
+
   placeholderModel: yes # By default, we start with no real file
 
   initialize: ->
@@ -83,6 +86,8 @@ module.exports = class CodeEditorView extends Backbone.View
   show: -> 
     @$el.show()
 
+    @active = yes
+
     Mousetrap.bind ['ctrl+s', 'command+s'], (e) =>
       e.preventDefault()
 
@@ -91,4 +96,6 @@ module.exports = class CodeEditorView extends Backbone.View
 
   hide: -> 
     @$el.hide()
+
+    @active = no
     Mousetrap.unbind ['ctrl+s', 'command+s']

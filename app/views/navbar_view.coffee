@@ -40,12 +40,14 @@ module.exports = class NavbarView extends Backbone.View
       e.preventDefault()
 
       # Save first, then run
-      app.code_editor.updateAndSave =>
+      app.editor().updateAndSave =>
         @buildAndRun()
 
     Mousetrap.bind ["ctrl+b", "command+b"], (e) => 
       e.preventDefault()
-      @buildProject()
+
+      app.editor().updateAndSave =>
+        @buildProject()
 
   helpers:
     divider: -> """

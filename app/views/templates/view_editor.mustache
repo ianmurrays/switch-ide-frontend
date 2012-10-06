@@ -531,8 +531,6 @@
         <div class="navbar-inner">
           <a class="brand" href="#">Title</a>
           <ul class="nav">
-            <li class="active"><a href="#">Home</a></li>
-            <li><a href="#">Link</a></li>
             <li><a href="#">Link</a></li>
           </ul>
         </div>
@@ -541,6 +539,104 @@
 
     <div class="preview"></div>
     <span class="name">Navbar</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navbar-nav-link" data-component-drop-only="ul.nav" data-preview="true">
+    <div class="payload">
+      <li><a href="#">Link</a></li>
+    </div>
+
+    <div class="drag-preview">
+      <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li><a href="#">Link</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Navbar Link</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navbar-nav-divider" data-component-drop-only="ul.nav" data-preview="true">
+    <div class="payload">
+      <li class="divider-vertical"></li>
+    </div>
+
+    <div class="drag-preview">
+      <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li class="divider-vertical"></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Navbar Divider</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navbar-nav-form" data-component-drop-only=".navbar-inner">
+    <div class="payload">
+      <form class="navbar-form pull-left">
+        <input type="text" class="span2">
+        <button type="submit" class="btn">Submit</button>
+      </form>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Navbar Form</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navbar-nav-search-form" data-component-drop-only=".navbar-inner">
+    <div class="payload">
+      <form class="navbar-search pull-left">
+        <input type="text" class="search-query" placeholder="Search">
+      </form>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Navbar Search Form</span>
+  </div>
+
+  <div class="switch-component" data-component-type="navbar-nav-dropdown" data-component-drop-only="ul.nav" data-preview="true">
+    <div class="payload">
+      <li class="dropdown">
+        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+          Dropdown
+          <b class="caret"></b>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="#">Link</a></li>
+          <li><a href="#">Link</a></li>
+        </ul>
+      </li>
+    </div>
+
+    <div class="drag-preview">
+      <div class="navbar navbar-inverse">
+        <div class="navbar-inner">
+          <ul class="nav">
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                Dropdown
+                <b class="caret"></b>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Link</a></li>
+                <li><a href="#">Link</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Navbar Dropdown</span>
   </div>
 
   <div class="switch-component" data-component-type="label">

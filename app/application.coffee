@@ -60,6 +60,13 @@ module.exports = class Application
 
     @resizeComponents()
 
+  # Returns the current editor (view or code)
+  editor: ->
+    if @code_editor.active
+      return @code_editor
+    else if @view_editor.active
+      return @view_editor
+
   # Since everything on the app is fixed, to correctly size everything we need some JS
   resizeComponents: ->
     # Resize the file browser
