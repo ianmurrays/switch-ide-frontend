@@ -84,5 +84,5 @@ module.exports = class CodeEditorView extends Backbone.View
     @$('textarea').addClass "mousetrap"
     this
 
-  show: -> @$el.fadeIn()
-  hide: -> @$el.fadeOut()
+  show: -> @$el.show()
+  hide: -> @$el.hide()

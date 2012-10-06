@@ -25,9 +25,10 @@ module.exports = class Router extends Backbone.Router
   project: (id) ->
     app.logger.log "Router#project"
     app.project = new Project(id: id)
-    app.filebrowser.setModel app.project
     app.project.fetch
-      success: -> Backbone.Mediator.pub 'status:set', "Project Loaded"
+      success: =>
+        app.filebrowser.setModel app.project
+        Backbone.Mediator.pub 'status:set', "Project Loaded"
 
     Backbone.Mediator.pub 'modal:hide'
 

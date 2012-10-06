@@ -209,8 +209,8 @@ module.exports = class ViewEditor extends Backbone.View
 
     this
 
-  show: -> @$el.fadeIn()
-  hide: -> @$el.fadeOut()
+  show: -> @$el.show()
+  hide: -> @$el.hide()
 
   unbindDroppables: -> @$('#view_container, #view_container *').droppable("destroy")
 

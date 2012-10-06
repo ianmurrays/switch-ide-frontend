@@ -5,8 +5,21 @@
   <ul class="unstyled">
     {{#projects}}
       <li>
-        <a href="#/projects/{{id}}"> {{name}} </a>
+        <a href="#/projects/{{id}}">{{name}}</a>
+        <span class="muted">(created {{created_at}})</span>
       </li>
     {{/projects}}
   </ul>
+
+  <hr>
+
+  <div class="pull-right">
+    <form class="form-inline">
+      Or you can create new project:
+      <div class="input-append">
+        <input class="span3" type="text" id="project_name" placeholder="Project's Name">
+        <button type="submit" class="btn btn-success" style="margin-top: -1px;">Create</button>
+      </div>
+    </form>
+  </div>
 </div>

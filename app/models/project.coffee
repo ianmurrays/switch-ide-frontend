@@ -8,6 +8,19 @@ module.exports = class Project extends Model
   initialize: ->
     @rootFolder = new Files
 
+  # Had to create this method to create a project, weird but whatevs :S
+  create: (callback) ->
+    $.ajax
+      url: [app.baseUrl, "projects"].join("/")
+      type: "POST"
+      data: 
+        name: @get('name')
+      success: (data) => 
+        @set 'id', data.id
+        @set 'path', data.path
+        callback?()
+
+
   fetchRootFolder: (callback) ->
     if @get('id')
       @rootFolder = new Files null, path: "/", project: this
