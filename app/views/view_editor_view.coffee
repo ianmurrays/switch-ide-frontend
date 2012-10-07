@@ -36,6 +36,7 @@ module.exports = class ViewEditor extends Backbone.View
     "click #view_container a": "dummy"
     "click #view_container button": "dummy"
     "click #view_container input[type=button]": "dummy"
+    "click label": "dummy" # Clicking on labels and being taken to the field is not cool here.
 
     # Normal actions
     "click #view_editor_header .html-editor-link a": "showHtmlEditor"
