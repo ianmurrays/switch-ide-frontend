@@ -155,7 +155,7 @@ module.exports = class ViewEditor extends Backbone.View
       lineNumbers: true
       tabSize: 2
       onCursorActivity: => @codemirror.matchHighlight("CodeMirror-matchhighlight")
-      mode: {name: "xml", htmlMode: yes}
+      mode: 'mustache' # {name: "xml", htmlMode: yes}
 
     @$('#code_container textarea').addClass('mousetrap')
 
@@ -206,6 +206,8 @@ module.exports = class ViewEditor extends Backbone.View
 
     if @activeView is "html"
       @showHtmlEditor()
+    else
+      @loadViewEditor(@model.get('content'))
 
     this
 

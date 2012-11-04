@@ -8,7 +8,8 @@ ContextualFileMenu = require 'views/contextual_file_menu_view'
 Logger = require 'logger'
 
 module.exports = class Application
-  baseUrl: 'http://localhost:9393/api/v1'
+  # baseUrl: '/api/v1'
+  baseUrl: 'http://localhost:9292/api/v1'
 
   constructor: ->
     $ =>

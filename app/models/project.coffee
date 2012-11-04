@@ -67,7 +67,7 @@ module.exports = class Project extends Model
       success: (response) ->
         unless response.result
           setTimeout ->
-            window.open "http://localhost:8888" # SUPER HARD CODED DAFUQ?
+            window.open response.url
           , 1500 # Wait a little, otherwise it won't work :D
           
           Backbone.Mediator.pub "status:set", "Running", sticky: yes
