@@ -22,7 +22,7 @@
     Custom HTML code
   </div> -->
 
-  <div class="switch-component" data-component-type="grid-row">
+  <!-- <div class="switch-component" data-component-type="grid-row">
     <div class="payload">
       <div class="row">
         <div class="span6">&nbsp;</div>
@@ -32,25 +32,25 @@
 
     <div class="preview"></div>
     <span class="name">Grid Row</span>
-  </div>  
+  </div>   -->
 
-  <div class="switch-component" data-component-type="row">
+  <!-- <div class="switch-component" data-component-type="row">
     <div class="payload">
       <div class="row"></div>
     </div>
 
     <div class="preview"></div>
     <span class="name">Row</span>
-  </div>
+  </div> -->
 
-  <div class="switch-component" data-component-type="span" data-component-drop-only="row">
+  <!-- <div class="switch-component" data-component-type="span" data-component-drop-only="row">
     <div class="payload">
       <div class="span1"></div>
     </div>
 
     <div class="preview"></div>
     <span class="name">Span</span>
-  </div>
+  </div> -->
 
   <!-- Tables -->
   <div class="switch-component" data-component-type="table" data-width="400">
@@ -75,7 +75,7 @@
     <span class="name">Table</span>
   </div>
 
-  <div class="switch-component" data-component-type="table-row" data-component-drop-only="tbody" data-preview="true">
+  <!-- <div class="switch-component" data-component-type="table-row" data-component-drop-only="tbody" data-preview="true">
     <div class="payload">
       <tr>
         <td>Cell</td>
@@ -101,7 +101,7 @@
 
     <div class="preview"></div>
     <span class="name">Table Cell</span>
-  </div>
+  </div> -->
 
   <!-- Button -->
   <div class="switch-component" data-component-type="button">
@@ -110,7 +110,6 @@
     </div>
 
     <div class="preview">
-      <button class="btn btn-primary btn-small">Button</button>
     </div>
     <span class="name">Button</span>
   </div>
@@ -146,22 +145,54 @@
     <span class="name">Button Group</span>
   </div>
 
+  <div class="switch-component" data-component-type="button-dropdown">
+    <div class="payload">
+      <div class="btn-group">
+        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          Action
+          <span class="caret"></span>
+        </a>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:;">Menu Item</a></li>
+          <li><a href="javascript:;">Menu Item</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Button Dropdown</span>
+  </div>
+
+  <div class="switch-component" data-component-type="button-dropdown-split">
+    <div class="payload">
+      <div class="btn-group">
+        <button class="btn">Action</button>
+        <button class="btn dropdown-toggle" data-toggle="dropdown">
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a href="javascript:;">Menu Item</a></li>
+          <li><a href="javascript:;">Menu Item</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="preview"></div>
+    <span class="name">Split Button Dropdown</span>
+  </div>
+
   <!-- Link -->
   <div class="switch-component" data-component-type="a">
     <div class="payload"><a href="javascript:;">Link</a></div>
-    <div class="preview">
-      <a href="javascript:;">&lt;a href&gt;</a>
-    </div>
+    <div class="preview"></div>
     <span class="name">Link</span>
   </div>
 
   <!-- Plain Text Input -->
   <div class="switch-component">
     <div class="payload"><input type="text"></div>
-    <div class="preview">
-      <input type="text" style="width: 30px;" placeholder="Text">
-    </div>
-    <span class="name">Input</span>
+    <div class="preview"></div>
+    <span class="name">Single Text Input</span>
   </div>
 
   <div class="switch-component">
@@ -196,9 +227,7 @@
       </div>
     </div>
 
-    <div class="preview">
-      <input type="text" style="width: 30px;" placeholder="Text">
-    </div>
+    <div class="preview"></div>
     <span class="name">Form Input</span>
   </div>
 
@@ -382,42 +411,6 @@
 
     <div class="preview"></div>
     <span class="name">Form Block Help</span>
-  </div>
-
-  <div class="switch-component" data-component-type="button-dropdown">
-    <div class="payload">
-      <div class="btn-group">
-        <a class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          Action
-          <span class="caret"></span>
-        </a>
-        <ul class="dropdown-menu">
-          <li><a href="javascript:;">Menu Item</a></li>
-          <li><a href="javascript:;">Menu Item</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="preview"></div>
-    <span class="name">Button Dropdown</span>
-  </div>
-
-  <div class="switch-component" data-component-type="button-dropdown-split">
-    <div class="payload">
-      <div class="btn-group">
-        <button class="btn">Action</button>
-        <button class="btn dropdown-toggle" data-toggle="dropdown">
-          <span class="caret"></span>
-        </button>
-        <ul class="dropdown-menu">
-          <li><a href="javascript:;">Menu Item</a></li>
-          <li><a href="javascript:;">Menu Item</a></li>
-        </ul>
-      </div>
-    </div>
-
-    <div class="preview"></div>
-    <span class="name">Split Button Dropdown</span>
   </div>
 
   <div class="switch-component" data-component-type="tabs">

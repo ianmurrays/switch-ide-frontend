@@ -60,6 +60,14 @@
 
       .preview {
         display: inline;
+
+        img {
+          height: 33px;
+          border: 1px solid lightgray;
+          border-radius: 2px;
+          -webkit-box-shadow: 0 0 5px lightGrey;
+          box-shadow: 0 0 5px lightGrey;
+        }
       }
 
       .name {
