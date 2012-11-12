@@ -10,6 +10,7 @@ module.exports = class NavbarView extends Backbone.View
     "click [data-menu_id=build]": "buildProject"
     "click [data-menu_id=build-run]": "buildAndRun"
     "click [data-menu_id=run]": "runProject"
+    "click [data-menu_id=archive]": "archiveProject"
 
   initialize: ->
     Backbone.Mediator.sub 'progress:show', @showProgress, this
@@ -141,3 +142,6 @@ module.exports = class NavbarView extends Backbone.View
 
   buildAndRun: ->
     app.project.buildAndRun()
+
+  archiveProject: -> app.project.archiveProject (url) ->
+    window.location.href = url

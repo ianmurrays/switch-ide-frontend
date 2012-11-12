@@ -81,6 +81,20 @@ module.exports = class Project extends Model
       app.logger.log "Now calling attempting to run"
       @runProject()
 
+  archiveProject: (callback) ->
+    Backbone.Mediator.pub "status:set", "Archiving...", sticky: yes
+
+    $.ajax
+      url: @railsPath("archive")
+      type: "POST"
+      success: (response) =>
+        if response.error
+          Backbone.Mediator.pub "status:set", "Archive failed"
+          bootbox.alert "There was an error archiving your project. Make sure you can Build it first."
+        else
+          Backbone.Mediator.pub "status:set", "Archive successful"
+          callback?(@railsPath("archive"))
+
   buildProject: (callback) ->
     Backbone.Mediator.pub "status:set", "Building..."
 
