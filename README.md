@@ -14,7 +14,7 @@ You need:
 - MongoDB
 
 Install ruby, node and brunch, then download [switch-ide-backend](https://github.com/switch-ide/switch-ide-backend), run `bundle install` and `rake server`.
-Go to switch-ide-frontend's directory and run `brunch w --server`. Make sure mongod is running!
+Go to switch-ide-frontend's directory, run `npm install -d` and then run `brunch w --server`. Make sure mongod is running!
 
 Point your browser to localhost:3333 and you should be good to go!.
 
