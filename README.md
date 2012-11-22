@@ -17,3 +17,11 @@ Install ruby, node and brunch, then download [switch-ide-backend](https://github
 Go to switch-ide-frontend's directory and run `brunch w --server`. Make sure mongod is running!
 
 Point your browser to localhost:3333 and you should be good to go!.
+
+# Warning
+
+This is **very** beta software, use and improve at your own risk!
+
+# License
+
+MIT License.
