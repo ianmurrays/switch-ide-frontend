@@ -1,29 +1,19 @@
+# Switch IDE
 
-C r u m b s  .     .
-                 .
+Switch IDE is an integrated development environment to create Backbone.js applications using CoffeeScript and Twitter Bootstrap.
+The beautiful thing is that you can edit your templates visually (think Xcode or Visual Studio).
 
-  A simple project skeleton for Brunch [http://brunch.io].
+# Installation
 
+You need:
 
-Usage
------
+- Ruby 1.9.3
+- Node (tested with v0.6.14)
+- Forever (forever from nodejitsu)
+- Brunch (brunch.io)
+- MongoDB
 
-  brunch new <app> -s https://github.com/meleyal/brunch-crumbs
+Install ruby, node and brunch, then download [switch-ide-backend](https://github.com/switch-ide/switch-ide-backend), run `bundle install` and `rake server`.
+Go to switch-ide-frontend's directory and run `brunch w --server`. Make sure mongod is running!
 
-
-Features
---------
-
-  Uses CoffeeScript, Backbone, jQuery, Sass, Eco, H5BP.
-
-  Includes Nginx/Heroku config and basic Docco generator.
-
-
-Examples
---------
-
-  Apps based on Crumbs:
-
-  - http://git.io/soundtape
-  - http://sport.guccitimeless.com
-
+Point your browser to localhost:3333 and you should be good to go!.
