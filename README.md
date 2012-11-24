@@ -13,7 +13,7 @@ You need:
 - Brunch (brunch.io)
 - MongoDB
 
-Install ruby, node and brunch, then download [switch-ide-backend](https://github.com/switch-ide/switch-ide-backend), run `bundle install` and `rake server`.
-Go to switch-ide-frontend's directory and run `brunch w --server`. Make sure mongod is running!
+Install ruby, node and brunch, then download [switch-ide-backend](https://github.com/switch-ide/switch-ide-backend), run `bundle install`. Make sure mongod is running and run `rake bootstrap`. Then run `rake server`.
+Go to switch-ide-frontend's directory and run `brunch w --server`.
 
 Point your browser to localhost:3333 and you should be good to go!.
